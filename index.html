@@ -204,18 +204,15 @@
     <button class="nav-item" onclick="showPanel('recurring')"><span class="nav-icon">🔄</span> Recurring Tasks</button>
     <button class="nav-item" onclick="showPanel('settings')"><span class="nav-icon">⚙️</span> Settings</button>
   </nav>
-
   <div class="panel active" id="panel-history">
     <div class="panel-title">📅 Daily History</div>
     <button class="save-now-btn" onclick="saveTodayWithAlert()">💾 Save Today Now</button>
     <div class="history-list" id="historyList"></div>
   </div>
-
   <div class="panel" id="panel-weekly">
     <div class="panel-title">📊 Weekly Review</div>
     <div class="weekly-content" id="weeklyContent"></div>
   </div>
-
   <div class="panel" id="panel-recurring">
     <div class="panel-title">🔄 Recurring Tasks</div>
     <div class="recurring-content">
@@ -228,7 +225,6 @@
       <div class="recurring-list" id="recurringList"></div>
     </div>
   </div>
-
   <div class="panel" id="panel-settings">
     <div class="panel-title">⚙️ Settings</div>
     <div class="settings-content">
@@ -249,7 +245,6 @@
       </div>
     </div>
   </div>
-
   <div class="sidebar-footer">Auto-saves every night at midnight 🟢</div>
 </div>
 
@@ -262,19 +257,16 @@
     </div>
     <div class="topbar-spacer"></div>
   </div>
-
   <div class="add-task-bar">
     <input type="text" id="taskInput" placeholder="Add a new task..." autocomplete="off" />
     <button id="addBtn" onclick="addTask()">+ Add</button>
   </div>
-
   <div class="unassigned-section" ondragover="onDragOver(event)" ondrop="onDrop(event,0)" ondragleave="onDragLeave(event)">
     <h3>📥 Unassigned — drag to one of the quadrants</h3>
     <div class="unassigned-list" id="list-0">
       <span class="drop-hint-unassigned" id="unassigned-hint">Add a task above ⬆</span>
     </div>
   </div>
-
   <div class="matrix-outer">
     <div class="axis-top">
       <div class="axis-top-label">IMPORTANT</div>
@@ -286,7 +278,6 @@
         <div class="axis-side-label">NOT URGENT</div>
       </div>
       <div class="matrix">
-
         <div class="quadrant" data-q="1" ondragover="onDragOver(event)" ondrop="onDrop(event,1)" ondragleave="onDragLeave(event)">
           <div class="quadrant-header">
             <div class="quadrant-icon">🔥</div>
@@ -303,7 +294,6 @@
           <div class="tasks-list" id="list-1"></div>
           <div class="drop-hint">Drag tasks here</div>
         </div>
-
         <div class="quadrant" data-q="3" ondragover="onDragOver(event)" ondrop="onDrop(event,3)" ondragleave="onDragLeave(event)">
           <div class="quadrant-header">
             <div class="quadrant-icon">📤</div>
@@ -320,7 +310,6 @@
           <div class="tasks-list" id="list-3"></div>
           <div class="drop-hint">Drag tasks here</div>
         </div>
-
         <div class="quadrant" data-q="2" ondragover="onDragOver(event)" ondrop="onDrop(event,2)" ondragleave="onDragLeave(event)">
           <div class="quadrant-header">
             <div class="quadrant-icon">📅</div>
@@ -337,7 +326,6 @@
           <div class="tasks-list" id="list-2"></div>
           <div class="drop-hint">Drag tasks here</div>
         </div>
-
         <div class="quadrant" data-q="4" ondragover="onDragOver(event)" ondrop="onDrop(event,4)" ondragleave="onDragLeave(event)">
           <div class="quadrant-header">
             <div class="quadrant-icon">🗑️</div>
@@ -354,11 +342,9 @@
           <div class="tasks-list" id="list-4"></div>
           <div class="drop-hint">Drag tasks here</div>
         </div>
-
       </div>
     </div>
   </div>
-
   <div class="legend">
     <div class="legend-item"><div class="legend-dot" style="background:var(--q1)"></div> Do Now</div>
     <div class="legend-item"><div class="legend-dot" style="background:var(--q3)"></div> Delegate</div>
@@ -402,7 +388,7 @@
   }
 
   function setSyncStatus(state, label) {
-    var dot = document.getElementById('syncDot'); var lbl = document.getElementById('syncLabel');
+    var dot = document.getElementById('syncDot'), lbl = document.getElementById('syncLabel');
     if (dot) dot.className = 'sync-dot ' + state;
     if (lbl) lbl.textContent = label;
   }
@@ -411,8 +397,17 @@
     var opts = { method: method || 'GET', headers: { 'Content-Type': 'application/json' } };
     if (body) opts.body = JSON.stringify(body);
     var res = await fetch(WORKER + '/notion' + path, opts);
-    if (!res.ok) { var e = await res.json(); throw new Error(e.message || 'API error'); }
+    if (!res.ok) { var e = await res.json(); throw new Error(e.message || res.status); }
     return res.json();
+  }
+
+  async function ensureNoteProperty() {
+    // Add Note property to existing database if it doesn't exist
+    try {
+      await nFetch('/databases/' + dbId, 'PATCH', {
+        properties: { Note: { rich_text: {} } }
+      });
+    } catch(e) { /* already exists or not critical */ }
   }
 
   async function findOrCreateDatabase() {
@@ -434,7 +429,7 @@
         text: p.properties.Name.title[0] ? p.properties.Name.title[0].plain_text : '',
         quadrant: (p.properties.Quadrant && p.properties.Quadrant.number != null) ? p.properties.Quadrant.number : 0,
         done: p.properties.Done ? p.properties.Done.checkbox : false,
-        note: (p.properties.Note && p.properties.Note.rich_text[0]) ? p.properties.Note.rich_text[0].plain_text : ''
+        note: (p.properties.Note && p.properties.Note.rich_text && p.properties.Note.rich_text[0]) ? p.properties.Note.rich_text[0].plain_text : ''
       };
     });
   }
@@ -444,7 +439,10 @@
     if (!text || !dbId) return;
     var btn = document.getElementById('addBtn'); btn.disabled = true; setSyncStatus('syncing', 'Saving...');
     try {
-      var page = await nFetch('/pages', 'POST', { parent: { database_id: dbId }, properties: { Name: { title: [{ text: { content: text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false }, Note: { rich_text: [] } } });
+      var page = await nFetch('/pages', 'POST', {
+        parent: { database_id: dbId },
+        properties: { Name: { title: [{ text: { content: text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false } }
+      });
       tasks.push({ id: page.id, text: text, quadrant: 0, done: false, note: '' });
       input.value = ''; render(); setSyncStatus('ok', 'Synced with Notion ✓');
     } catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
@@ -467,8 +465,15 @@
   async function saveNote(id, note) {
     var t = tasks.find(function(t) { return t.id === id; }); if (!t) return;
     t.note = note; setSyncStatus('syncing', 'Saving note...');
-    try { await nFetch('/pages/' + id, 'PATCH', { properties: { Note: { rich_text: note ? [{ text: { content: note } }] : [] } } }); setSyncStatus('ok', 'Synced with Notion ✓'); }
-    catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
+    try {
+      await nFetch('/pages/' + id, 'PATCH', { properties: { Note: { rich_text: note ? [{ text: { content: note } }] : [] } } });
+      setSyncStatus('ok', 'Synced with Notion ✓');
+    } catch(e) {
+      // Note property might not exist yet, try to add it first
+      await ensureNoteProperty();
+      try { await nFetch('/pages/' + id, 'PATCH', { properties: { Note: { rich_text: note ? [{ text: { content: note } }] : [] } } }); setSyncStatus('ok', 'Synced with Notion ✓'); }
+      catch(e2) { setSyncStatus('error', 'Error: ' + e2.message); }
+    }
   }
 
   function render() {
@@ -590,8 +595,10 @@
     localStorage.setItem('eisenhower-recurring-check', today);
     getRecurring().forEach(function(r) {
       if (!tasks.find(function(t) { return t.text === r.text && !t.done; })) {
-        nFetch('/pages', 'POST', { parent: { database_id: dbId }, properties: { Name: { title: [{ text: { content: r.text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false }, Note: { rich_text: [] } } })
-        .then(function(page) { tasks.push({ id: page.id, text: r.text, quadrant: 0, done: false, note: '' }); render(); }).catch(function() {});
+        nFetch('/pages', 'POST', {
+          parent: { database_id: dbId },
+          properties: { Name: { title: [{ text: { content: r.text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false } }
+        }).then(function(page) { tasks.push({ id: page.id, text: r.text, quadrant: 0, done: false, note: '' }); render(); }).catch(function() {});
       }
     });
   }
@@ -608,6 +615,7 @@
   (async function() {
     try {
       dbId = await findOrCreateDatabase();
+      await ensureNoteProperty();
       await loadTasks(); render(); setSyncStatus('ok', 'Synced with Notion ✓');
       checkRecurringTasks(); scheduleMidnightSave(); renderHistory();
     } catch(e) { setSyncStatus('error', 'Connection error: ' + e.message); console.error(e); }
