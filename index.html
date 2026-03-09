@@ -67,7 +67,7 @@
   .unassigned-task { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 0.85rem; cursor: grab; display: flex; align-items: center; gap: 6px; transition: box-shadow 0.15s, transform 0.15s; user-select: none; }
   .unassigned-task:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); transform: translateY(-1px); }
   .unassigned-task.dragging { opacity: 0.4; }
-  .recurring-badge { font-size: 0.65rem; background: #007AFF20; color: #007AFF; border-radius: 4px; padding: 1px 5px; font-weight: 700; flex-shrink: 0; }
+  .recurring-icon { font-size: 0.72rem; flex-shrink: 0; opacity: 0.7; }
   .drop-hint-unassigned { font-size: 0.8rem; color: var(--text-muted); padding: 4px 0; }
   .matrix-outer { max-width: 960px; margin: 0 auto; }
   .axis-top { display: flex; margin-left: 28px; margin-bottom: 6px; }
@@ -91,7 +91,10 @@
   .quadrant-title-row { display: flex; align-items: center; gap: 5px; }
   .quadrant-title { font-size: 0.92rem; font-weight: 700; }
   .quadrant-subtitle { font-size: 0.68rem; color: var(--text-muted); }
-  .task-count { margin-left: auto; font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--text-muted); background: rgba(128,128,128,0.1); border-radius: 20px; padding: 2px 9px; }
+  .quadrant-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  .task-count { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--text-muted); background: rgba(128,128,128,0.1); border-radius: 20px; padding: 2px 9px; }
+  .sort-btn { background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--text-muted); padding: 2px 6px; border-radius: 6px; transition: background 0.15s; title: "Sort: undone first"; }
+  .sort-btn:hover { background: rgba(128,128,128,0.15); color: var(--text); }
   .progress-bar-wrap { height: 4px; background: rgba(128,128,128,0.15); border-radius: 2px; margin-bottom: 10px; overflow: hidden; }
   .progress-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
   .quadrant[data-q="1"] .progress-bar-fill { background: var(--q1); }
@@ -106,19 +109,20 @@
   [data-theme="dark"] .tooltip::after { border-top-color: #f0f0f0; }
   .info-btn:hover .tooltip { opacity: 1; }
   .tasks-list { display: flex; flex-direction: column; gap: 6px; min-height: 36px; }
-  .task-item { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); overflow: hidden; animation: slideIn 0.2s ease; user-select: none; }
+  .task-item { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); overflow: hidden; animation: slideIn 0.2s ease; user-select: none; cursor: grab; }
+  .task-item:active { cursor: grabbing; }
   @keyframes slideIn { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
-  .task-main { padding: 9px 12px; display: flex; align-items: center; gap: 9px; cursor: grab; }
   .task-item.dragging { opacity: 0.4; }
+  .task-item.drag-over-item { border-top: 2px solid var(--text); }
   .task-item:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+  .task-main { padding: 9px 12px; display: flex; align-items: center; gap: 9px; }
   .task-check { width: 17px; height: 17px; border-radius: 50%; border: 2px solid; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; }
   .quadrant[data-q="1"] .task-check { border-color: var(--q1); }
   .quadrant[data-q="2"] .task-check { border-color: var(--q2); }
   .quadrant[data-q="3"] .task-check { border-color: var(--q3); }
   .quadrant[data-q="4"] .task-check { border-color: var(--q4); }
-  .task-text { flex: 1; font-size: 0.88rem; line-height: 1.4; cursor: text; }
+  .task-text { flex: 1; font-size: 0.88rem; line-height: 1.4; cursor: grab; }
   .task-text.done { text-decoration: line-through; color: var(--text-muted); }
-  .task-text-input { flex: 1; font-size: 0.88rem; font-family: 'Inter', sans-serif; border: none; outline: none; background: transparent; color: var(--text); padding: 0; }
   .task-note-btn { background: none; border: none; cursor: pointer; font-size: 0.75rem; color: var(--text-muted); padding: 2px 5px; border-radius: 4px; transition: color 0.15s; flex-shrink: 0; }
   .task-note-btn:hover { color: var(--text); }
   .task-delete { background: none; border: none; cursor: pointer; color: var(--border); font-size: 0.9rem; padding: 2px 4px; border-radius: 4px; transition: color 0.15s; line-height: 1; flex-shrink: 0; }
@@ -127,6 +131,7 @@
   .task-note-area.open { display: block; }
   .task-note-input { width: 100%; border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px; font-family: 'Inter', sans-serif; font-size: 0.82rem; background: var(--bg); color: var(--text); resize: none; outline: none; min-height: 56px; transition: border 0.2s; }
   .task-note-input:focus { border-color: var(--text-muted); }
+  .recurring-tag { font-size: 0.65rem; flex-shrink: 0; opacity: 0.6; }
   .drop-hint { text-align: center; font-size: 0.78rem; color: var(--text-muted); padding: 10px; border: 2px dashed var(--border); border-radius: 8px; display: none; }
   .tasks-list:empty + .drop-hint { display: block; }
   .legend { max-width: 960px; margin: 16px auto 0; display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; }
@@ -166,9 +171,8 @@
   .recurring-list { display: flex; flex-direction: column; gap: 6px; }
   .recurring-item { display: flex; align-items: center; gap: 6px; background: var(--bg); border-radius: 8px; padding: 8px 10px; font-size: 0.85rem; }
   .recurring-item-text { flex: 1; cursor: pointer; }
-  .recurring-item-text:hover { text-decoration: underline; }
-  .recurring-item input { flex: 1; border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; background: var(--surface); color: var(--text); outline: none; }
-  .recurring-readd { background: none; border: none; cursor: pointer; color: #007AFF; font-size: 0.9rem; padding: 2px 5px; border-radius: 4px; transition: background 0.15s; }
+  .recurring-item-text:hover { text-decoration: underline dotted; }
+  .recurring-readd { background: none; border: none; cursor: pointer; color: #007AFF; font-size: 0.82rem; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
   .recurring-readd:hover { background: #007AFF20; }
   .recurring-del { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; padding: 2px 4px; }
   .recurring-del:hover { color: #FF4D4D; }
@@ -285,6 +289,7 @@
         <div class="axis-side-label">NOT URGENT</div>
       </div>
       <div class="matrix">
+
         <div class="quadrant" data-q="1" ondragover="onDragOver(event)" ondrop="onDrop(event,1)" ondragleave="onDragLeave(event)">
           <div class="quadrant-header">
             <div class="quadrant-icon">🔥</div>
@@ -295,12 +300,16 @@
               </div>
               <div class="quadrant-subtitle">Important + Urgent</div>
             </div>
-            <div class="task-count" id="count-1">0</div>
+            <div class="quadrant-actions">
+              <button class="sort-btn" onclick="sortQuadrant(1)" title="Sort: undone first">↕</button>
+              <div class="task-count" id="count-1">0</div>
+            </div>
           </div>
           <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-1" style="width:0%"></div></div>
           <div class="tasks-list" id="list-1"></div>
           <div class="drop-hint">Drag tasks here</div>
         </div>
+
         <div class="quadrant" data-q="3" ondragover="onDragOver(event)" ondrop="onDrop(event,3)" ondragleave="onDragLeave(event)">
           <div class="quadrant-header">
             <div class="quadrant-icon">📤</div>
@@ -311,12 +320,16 @@
               </div>
               <div class="quadrant-subtitle">Not Important + Urgent</div>
             </div>
-            <div class="task-count" id="count-3">0</div>
+            <div class="quadrant-actions">
+              <button class="sort-btn" onclick="sortQuadrant(3)" title="Sort: undone first">↕</button>
+              <div class="task-count" id="count-3">0</div>
+            </div>
           </div>
           <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-3" style="width:0%"></div></div>
           <div class="tasks-list" id="list-3"></div>
           <div class="drop-hint">Drag tasks here</div>
         </div>
+
         <div class="quadrant" data-q="2" ondragover="onDragOver(event)" ondrop="onDrop(event,2)" ondragleave="onDragLeave(event)">
           <div class="quadrant-header">
             <div class="quadrant-icon">📅</div>
@@ -327,12 +340,16 @@
               </div>
               <div class="quadrant-subtitle">Important + Not Urgent</div>
             </div>
-            <div class="task-count" id="count-2">0</div>
+            <div class="quadrant-actions">
+              <button class="sort-btn" onclick="sortQuadrant(2)" title="Sort: undone first">↕</button>
+              <div class="task-count" id="count-2">0</div>
+            </div>
           </div>
           <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-2" style="width:0%"></div></div>
           <div class="tasks-list" id="list-2"></div>
           <div class="drop-hint">Drag tasks here</div>
         </div>
+
         <div class="quadrant" data-q="4" ondragover="onDragOver(event)" ondrop="onDrop(event,4)" ondragleave="onDragLeave(event)">
           <div class="quadrant-header">
             <div class="quadrant-icon">🗑️</div>
@@ -343,12 +360,16 @@
               </div>
               <div class="quadrant-subtitle">Not Important + Not Urgent</div>
             </div>
-            <div class="task-count" id="count-4">0</div>
+            <div class="quadrant-actions">
+              <button class="sort-btn" onclick="sortQuadrant(4)" title="Sort: undone first">↕</button>
+              <div class="task-count" id="count-4">0</div>
+            </div>
           </div>
           <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-4" style="width:0%"></div></div>
           <div class="tasks-list" id="list-4"></div>
           <div class="drop-hint">Drag tasks here</div>
         </div>
+
       </div>
     </div>
   </div>
@@ -363,7 +384,11 @@
 <script>
   const WORKER = 'https://crimson-sun-5aed.oriammo1994.workers.dev';
   const PAGE_ID = '31e98d96-dadd-8001-b74a-ee60fe7bb71b';
-  let tasks = [], dragId = null, dbId = null;
+  let tasks = [], dragId = null, dragOverId = null, dbId = null;
+
+  // order map: taskId -> order index per quadrant
+  var orderMap = JSON.parse(localStorage.getItem('eisenhower-order') || '{}');
+  function saveOrder() { localStorage.setItem('eisenhower-order', JSON.stringify(orderMap)); }
 
   var savedTheme = localStorage.getItem('theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
@@ -447,7 +472,7 @@
 
   async function deleteTask(id) {
     setSyncStatus('syncing', 'Deleting...');
-    try { await nFetch('/pages/' + id, 'PATCH', { archived: true }); tasks = tasks.filter(function(t) { return t.id !== id; }); render(); setSyncStatus('ok', 'Synced with Notion ✓'); }
+    try { await nFetch('/pages/' + id, 'PATCH', { archived: true }); tasks = tasks.filter(function(t) { return t.id !== id; }); delete orderMap[id]; saveOrder(); render(); setSyncStatus('ok', 'Synced with Notion ✓'); }
     catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
   }
 
@@ -469,14 +494,29 @@
   async function saveNote(id, note) {
     var t = tasks.find(function(t) { return t.id === id; }); if (!t) return;
     t.note = note; setSyncStatus('syncing', 'Saving note...');
-    try {
-      await nFetch('/pages/' + id, 'PATCH', { properties: { Note: { rich_text: note ? [{ text: { content: note } }] : [] } } });
-      setSyncStatus('ok', 'Synced with Notion ✓');
-    } catch(e) {
+    try { await nFetch('/pages/' + id, 'PATCH', { properties: { Note: { rich_text: note ? [{ text: { content: note } }] : [] } } }); setSyncStatus('ok', 'Synced with Notion ✓'); }
+    catch(e) {
       await ensureNoteProperty();
       try { await nFetch('/pages/' + id, 'PATCH', { properties: { Note: { rich_text: note ? [{ text: { content: note } }] : [] } } }); setSyncStatus('ok', 'Synced with Notion ✓'); }
       catch(e2) { setSyncStatus('error', 'Error: ' + e2.message); }
     }
+  }
+
+  function getTasksForQuadrant(q) {
+    var qt = tasks.filter(function(t) { return t.quadrant === q; });
+    qt.sort(function(a, b) {
+      var oa = orderMap[a.id] !== undefined ? orderMap[a.id] : 9999;
+      var ob = orderMap[b.id] !== undefined ? orderMap[b.id] : 9999;
+      return oa - ob;
+    });
+    return qt;
+  }
+
+  function sortQuadrant(q) {
+    var qt = tasks.filter(function(t) { return t.quadrant === q; });
+    qt.sort(function(a, b) { return (a.done ? 1 : 0) - (b.done ? 1 : 0); });
+    qt.forEach(function(t, i) { orderMap[t.id] = i; });
+    saveOrder(); render();
   }
 
   function render() {
@@ -489,7 +529,18 @@
     });
     var hint = document.getElementById('unassigned-hint');
     if (hint) hint.style.display = tasks.filter(function(t) { return t.quadrant === 0; }).length === 0 ? 'block' : 'none';
-    tasks.forEach(function(task) { var el = document.getElementById('list-' + task.quadrant); if (el) el.appendChild(createTaskEl(task)); });
+
+    // Render unassigned
+    tasks.forEach(function(task) {
+      if (task.quadrant !== 0) return;
+      var el = document.getElementById('list-0'); if (el) el.appendChild(createTaskEl(task));
+    });
+
+    // Render quadrants with ordering
+    [1,2,3,4].forEach(function(q) {
+      var el = document.getElementById('list-' + q); if (!el) return;
+      getTasksForQuadrant(q).forEach(function(task) { el.appendChild(createTaskEl(task)); });
+    });
   }
 
   function createTaskEl(task) {
@@ -498,10 +549,10 @@
     if (task.quadrant === 0) {
       var div = document.createElement('div'); div.className = 'unassigned-task'; div.draggable = true;
       div.innerHTML =
-        (isRecurring ? '<span class="recurring-badge">🔄 recurring</span>' : '') +
-        '<span class="task-text" ondblclick="startInlineEdit(this, \'' + task.id + '\')">' + esc(task.text) + '</span>' +
+        (isRecurring ? '<span class="recurring-icon" title="Recurring task">🔄</span>' : '') +
+        '<span ondblclick="startInlineEdit(this,\'' + task.id + '\')">' + esc(task.text) + '</span>' +
         '<button class="task-delete" onclick="deleteTask(\'' + task.id + '\')">✕</button>';
-      div.addEventListener('dragstart', function() { dragId = task.id; setTimeout(function() { div.classList.add('dragging'); }, 0); });
+      div.addEventListener('dragstart', function(e) { dragId = task.id; e.dataTransfer.effectAllowed = 'move'; setTimeout(function() { div.classList.add('dragging'); }, 0); });
       div.addEventListener('dragend', function() { div.classList.remove('dragging'); });
       return div;
     }
@@ -510,34 +561,62 @@
     wrap.innerHTML =
       '<div class="task-main">' +
         '<div class="task-check" onclick="toggleDone(\'' + task.id + '\')">' + (task.done ? '✓' : '') + '</div>' +
-        (isRecurring ? '<span class="recurring-badge">🔄</span>' : '') +
-        '<span class="task-text' + (task.done ? ' done' : '') + '" ondblclick="startInlineEdit(this, \'' + task.id + '\')">' + esc(task.text) + '</span>' +
+        (isRecurring ? '<span class="recurring-tag" title="Recurring">🔄</span>' : '') +
+        '<span class="task-text' + (task.done ? ' done' : '') + '" ondblclick="startInlineEdit(this,\'' + task.id + '\')">' + esc(task.text) + '</span>' +
         '<button class="task-note-btn" onclick="toggleNote(\'' + task.id + '\')" title="Note">📝</button>' +
         '<button class="task-delete" onclick="deleteTask(\'' + task.id + '\')">✕</button>' +
       '</div>' +
       '<div class="task-note-area' + (task.note ? ' open' : '') + '" id="note-' + task.id + '">' +
         '<textarea class="task-note-input" placeholder="Add a note..." onblur="saveNote(\'' + task.id + '\', this.value)">' + esc(task.note) + '</textarea>' +
       '</div>';
+
     wrap.addEventListener('dragstart', function(e) {
-      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') { e.preventDefault(); return; }
-      dragId = task.id; setTimeout(function() { wrap.classList.add('dragging'); }, 0);
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') { e.preventDefault(); return; }
+      dragId = task.id; e.dataTransfer.effectAllowed = 'move';
+      setTimeout(function() { wrap.classList.add('dragging'); }, 0);
     });
-    wrap.addEventListener('dragend', function() { wrap.classList.remove('dragging'); });
+    wrap.addEventListener('dragend', function() {
+      wrap.classList.remove('dragging');
+      document.querySelectorAll('.drag-over-item').forEach(function(el) { el.classList.remove('drag-over-item'); });
+    });
+    wrap.addEventListener('dragover', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      document.querySelectorAll('.drag-over-item').forEach(function(el) { el.classList.remove('drag-over-item'); });
+      if (dragId && dragId !== task.id) { wrap.classList.add('drag-over-item'); dragOverId = task.id; }
+    });
+    wrap.addEventListener('drop', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      wrap.classList.remove('drag-over-item');
+      if (!dragId || dragId === task.id) return;
+      var fromTask = tasks.find(function(t) { return t.id === dragId; });
+      var toTask = task;
+      if (!fromTask) return;
+      // If same quadrant: reorder
+      if (fromTask.quadrant === toTask.quadrant) {
+        var qt = getTasksForQuadrant(fromTask.quadrant);
+        var fromIdx = qt.findIndex(function(t) { return t.id === fromTask.id; });
+        var toIdx = qt.findIndex(function(t) { return t.id === toTask.id; });
+        qt.splice(fromIdx, 1); qt.splice(toIdx, 0, fromTask);
+        qt.forEach(function(t, i) { orderMap[t.id] = i; });
+        saveOrder(); render();
+        dragId = null;
+      }
+      // Cross-quadrant drop handled by quadrant ondrop
+    });
     return wrap;
   }
 
   function startInlineEdit(spanEl, id) {
     var current = spanEl.textContent;
     var input = document.createElement('input');
-    input.className = 'task-text-input';
+    input.style.cssText = 'flex:1;border:none;outline:none;font-family:Inter,sans-serif;font-size:0.88rem;background:transparent;color:var(--text);padding:0;width:100%;cursor:text;';
     input.value = current;
-    spanEl.replaceWith(input);
-    input.focus(); input.select();
+    spanEl.replaceWith(input); input.focus(); input.select();
     function finish() {
       var newText = input.value.trim() || current;
       var span = document.createElement('span');
       span.className = spanEl.className;
-      span.setAttribute('ondblclick', 'startInlineEdit(this, \'' + id + '\')');
+      span.setAttribute('ondblclick', 'startInlineEdit(this,\'' + id + '\')');
       span.textContent = newText;
       input.replaceWith(span);
       if (newText !== current) renameTask(id, newText);
@@ -558,7 +637,11 @@
     if (!dragId) return;
     var task = tasks.find(function(t) { return t.id === dragId; }); dragId = null;
     if (!task || task.quadrant === q) return;
-    task.quadrant = q; render(); setSyncStatus('syncing', 'Saving...');
+    task.quadrant = q;
+    // assign order at end
+    var qt = tasks.filter(function(t) { return t.quadrant === q; });
+    orderMap[task.id] = qt.length + 999;
+    saveOrder(); render(); setSyncStatus('syncing', 'Saving...');
     try { await nFetch('/pages/' + task.id, 'PATCH', { properties: { Quadrant: { number: q } } }); setSyncStatus('ok', 'Synced with Notion ✓'); }
     catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
   }
@@ -633,14 +716,15 @@
     var el = document.getElementById('rec-text-' + id); if (!el) return;
     var oldText = item.text;
     var input = document.createElement('input');
-    input.value = oldText; input.style.cssText = 'flex:1;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-family:Inter,sans-serif;font-size:0.85rem;background:var(--surface);color:var(--text);outline:none;';
+    input.value = oldText;
+    input.style.cssText = 'flex:1;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-family:Inter,sans-serif;font-size:0.85rem;background:var(--surface);color:var(--text);outline:none;min-width:0;';
     el.replaceWith(input); input.focus(); input.select();
     function finish() {
       var newText = input.value.trim() || oldText;
       item.text = newText; saveRecurringList(list);
       var span = document.createElement('span');
       span.className = 'recurring-item-text'; span.id = 'rec-text-' + id;
-      span.title = 'Click to rename'; span.textContent = newText;
+      span.title = 'Click to rename'; span.textContent = '🔄 ' + newText;
       span.onclick = function() { startRecurringEdit(id); };
       input.replaceWith(span);
       if (newText !== oldText) render();
