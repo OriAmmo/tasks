@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eisenhower Matrix</title>
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --q1: #FF4D4D; --q1-light: #fff0f0;
@@ -12,39 +12,46 @@
     --q3: #007AFF; --q3-light: #eef5ff;
     --q4: #34C759; --q4-light: #edfff2;
     --bg: #f5f4f0; --surface: #ffffff; --text: #1a1a1a; --text-muted: #888;
-    --radius: 16px; --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    --border: #e5e5e5; --radius: 16px; --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  [data-theme="dark"] {
+    --bg: #141414; --surface: #1e1e1e; --text: #f0f0f0; --text-muted: #777;
+    --border: #2a2a2a; --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --q1-light: #2a1010; --q2-light: #2a1e00; --q3-light: #001a2a; --q4-light: #0a2010;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px; }
-  header { text-align: center; margin-bottom: 28px; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px; transition: background 0.3s, color 0.3s; }
+  header { text-align: center; margin-bottom: 28px; position: relative; }
   header h1 { font-size: 2.2rem; font-weight: 900; letter-spacing: -1px; }
   header p { color: var(--text-muted); font-size: 0.95rem; margin-top: 4px; }
+  .header-controls { position: absolute; top: 0; right: 0; display: flex; gap: 8px; }
+  .icon-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; cursor: pointer; font-size: 1rem; color: var(--text); transition: background 0.2s; }
+  .icon-btn:hover { background: var(--border); }
   .sync-status { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; margin-top: 8px; color: var(--text-muted); }
   .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; transition: background 0.3s; }
   .sync-dot.syncing { background: #FF9500; animation: pulse 1s infinite; }
   .sync-dot.ok { background: #34C759; }
   .sync-dot.error { background: #FF4D4D; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .add-task-bar {
-    display: flex; gap: 10px; max-width: 700px; margin: 0 auto 16px;
-    background: var(--surface); border-radius: 50px; padding: 8px 8px 8px 20px;
-    box-shadow: var(--shadow); border: 2px solid transparent; transition: border 0.2s;
-  }
-  .add-task-bar:focus-within { border-color: #1a1a1a; }
-  .add-task-bar input { flex: 1; border: none; outline: none; font-family: 'Heebo', sans-serif; font-size: 1rem; background: transparent; color: var(--text); direction: ltr; }
+  .add-task-bar { display: flex; gap: 10px; max-width: 700px; margin: 0 auto 16px; background: var(--surface); border-radius: 50px; padding: 8px 8px 8px 20px; box-shadow: var(--shadow); border: 2px solid transparent; transition: border 0.2s; }
+  .add-task-bar:focus-within { border-color: var(--text); }
+  .add-task-bar input { flex: 1; border: none; outline: none; font-family: 'Inter', sans-serif; font-size: 1rem; background: transparent; color: var(--text); }
   .add-task-bar input::placeholder { color: var(--text-muted); }
-  .add-task-bar button { background: #1a1a1a; color: white; border: none; border-radius: 40px; padding: 10px 22px; font-family: 'Heebo', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: transform 0.15s, background 0.2s; white-space: nowrap; }
-  .add-task-bar button:hover { background: #333; transform: scale(1.03); }
-  .add-task-bar button:disabled { background: #aaa; transform: none; cursor: not-allowed; }
-  .unassigned-section { max-width: 700px; margin: 0 auto 32px; background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 2px dashed #ddd; }
+  .add-task-bar button { background: var(--text); color: var(--bg); border: none; border-radius: 40px; padding: 10px 22px; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; }
+  .add-task-bar button:hover { opacity: 0.8; }
+  .add-task-bar button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .unassigned-section { max-width: 700px; margin: 0 auto 32px; background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 2px dashed var(--border); }
   .unassigned-section h3 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; }
   .unassigned-list { display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; }
-  .unassigned-task { background: #f5f4f0; border: 1px solid #e0ddd5; border-radius: 20px; padding: 6px 14px; font-size: 0.85rem; cursor: grab; display: flex; align-items: center; gap: 8px; transition: box-shadow 0.15s, transform 0.15s; animation: slideIn 0.2s ease; user-select: none; }
+  .unassigned-task { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 0.85rem; cursor: grab; display: flex; align-items: center; gap: 8px; transition: box-shadow 0.15s, transform 0.15s; animation: slideIn 0.2s ease; user-select: none; }
   .unassigned-task:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); transform: translateY(-1px); }
   .unassigned-task.dragging { opacity: 0.4; }
-  .drop-hint-unassigned { font-size: 0.8rem; color: #bbb; padding: 6px 0; }
+  .drop-hint-unassigned { font-size: 0.8rem; color: var(--text-muted); padding: 6px 0; }
+  .axis-labels-top { max-width: 960px; margin: 0 auto 6px; display: flex; justify-content: space-between; padding: 0 54px; }
+  .axis-labels-top span { font-size: 0.72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); }
   .matrix-wrapper { display: flex; align-items: center; gap: 10px; max-width: 960px; margin: 0 auto; }
-  .axis-label-side { writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.78rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); user-select: none; padding: 10px 0; }
+  .axis-label-side { writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); user-select: none; padding: 10px 0; }
+  .axis-label-side.flip { transform: rotate(180deg); }
   .matrix { flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 14px; }
   .quadrant { background: var(--surface); border-radius: var(--radius); padding: 18px; min-height: 240px; box-shadow: var(--shadow); border-top: 4px solid; transition: box-shadow 0.2s, transform 0.15s; }
   .quadrant.drag-over { box-shadow: 0 8px 32px rgba(0,0,0,0.15); transform: scale(1.01); }
@@ -58,11 +65,19 @@
   .quadrant[data-q="2"] .quadrant-icon { background: var(--q2); }
   .quadrant[data-q="3"] .quadrant-icon { background: var(--q3); }
   .quadrant[data-q="4"] .quadrant-icon { background: var(--q4); }
+  .quadrant-title-row { display: flex; align-items: center; gap: 5px; }
   .quadrant-title { font-size: 0.95rem; font-weight: 700; line-height: 1.2; }
   .quadrant-subtitle { font-size: 0.72rem; color: var(--text-muted); font-weight: 400; }
-  .task-count { margin-left: auto; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--text-muted); background: rgba(0,0,0,0.05); border-radius: 20px; padding: 2px 10px; }
+  .task-count { margin-left: auto; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--text-muted); background: rgba(128,128,128,0.1); border-radius: 20px; padding: 2px 10px; }
+  .info-btn { background: rgba(128,128,128,0.2); border: none; cursor: pointer; width: 16px; height: 16px; border-radius: 50%; color: var(--text-muted); font-size: 0.65rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; font-family: 'Inter', sans-serif; }
+  .info-btn:hover { background: rgba(128,128,128,0.4); }
+  .tooltip { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1a1a1a; color: white; font-size: 0.78rem; line-height: 1.5; padding: 10px 14px; border-radius: 10px; width: 220px; z-index: 999; pointer-events: none; opacity: 0; transition: opacity 0.15s; text-align: left; font-weight: 400; white-space: normal; }
+  [data-theme="dark"] .tooltip { background: #f0f0f0; color: #1a1a1a; }
+  .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #1a1a1a; }
+  [data-theme="dark"] .tooltip::after { border-top-color: #f0f0f0; }
+  .info-btn:hover .tooltip { opacity: 1; }
   .tasks-list { display: flex; flex-direction: column; gap: 8px; min-height: 40px; }
-  .task-item { background: white; border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: grab; transition: box-shadow 0.15s, transform 0.15s, opacity 0.15s; border: 1px solid rgba(0,0,0,0.06); animation: slideIn 0.2s ease; user-select: none; }
+  .task-item { background: var(--surface); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: grab; transition: box-shadow 0.15s, transform 0.15s, opacity 0.15s; border: 1px solid var(--border); animation: slideIn 0.2s ease; user-select: none; }
   @keyframes slideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
   .task-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-1px); }
   .task-item.dragging { opacity: 0.4; cursor: grabbing; }
@@ -73,22 +88,42 @@
   .quadrant[data-q="4"] .task-check { border-color: var(--q4); }
   .task-text { flex: 1; font-size: 0.9rem; line-height: 1.4; }
   .task-text.done { text-decoration: line-through; color: var(--text-muted); }
-  .task-delete { background: none; border: none; cursor: pointer; color: #ccc; font-size: 1rem; padding: 2px 4px; border-radius: 4px; transition: color 0.15s; line-height: 1; }
+  .task-delete { background: none; border: none; cursor: pointer; color: var(--border); font-size: 1rem; padding: 2px 4px; border-radius: 4px; transition: color 0.15s; line-height: 1; }
   .task-delete:hover { color: #FF4D4D; }
-  .drop-hint { text-align: center; font-size: 0.8rem; color: #bbb; padding: 10px; border: 2px dashed #ddd; border-radius: 8px; display: none; }
+  .drop-hint { text-align: center; font-size: 0.8rem; color: var(--text-muted); padding: 10px; border: 2px dashed var(--border); border-radius: 8px; display: none; }
   .tasks-list:empty + .drop-hint { display: block; }
   .legend { max-width: 960px; margin: 20px auto 0; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text-muted); }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .loading-overlay { position: fixed; inset: 0; background: rgba(245,244,240,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; gap: 12px; }
+  .history-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .history-overlay.open { opacity: 1; pointer-events: all; }
+  .history-panel { background: var(--surface); border-radius: 20px; padding: 28px; width: 100%; max-width: 560px; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .history-panel h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+  .history-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted); line-height: 1; }
+  .history-day { margin-bottom: 12px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .history-day-header { padding: 12px 16px; background: var(--bg); font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .history-day-header:hover { filter: brightness(0.95); }
+  .history-day-body { padding: 12px 16px; display: none; }
+  .history-day-body.open { display: block; }
+  .history-quadrant { margin-bottom: 12px; }
+  .history-quadrant-title { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .history-task { font-size: 0.85rem; padding: 5px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .history-task:last-child { border-bottom: none; }
+  .history-task.done { text-decoration: line-through; color: var(--text-muted); }
+  .save-day-btn { background: var(--text); color: var(--bg); border: none; border-radius: 10px; padding: 10px 20px; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; margin-bottom: 20px; width: 100%; transition: opacity 0.2s; }
+  .save-day-btn:hover { opacity: 0.8; }
+  .no-history { color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 20px 0; }
+  .loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 300; gap: 12px; transition: background 0.3s; }
   .loading-overlay p { color: var(--text-muted); font-size: 0.95rem; }
-  .spinner { width: 36px; height: 36px; border: 3px solid #ddd; border-top-color: #1a1a1a; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--text); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @media (max-width: 600px) {
     .matrix { grid-template-columns: 1fr; }
     .axis-label-side { display: none; }
+    .axis-labels-top { display: none; }
     body { padding: 14px; }
     header h1 { font-size: 1.6rem; }
+    .header-controls { position: static; justify-content: center; margin-top: 10px; }
   }
 </style>
 </head>
@@ -99,12 +134,24 @@
   <p>Loading tasks from Notion...</p>
 </div>
 
+<div class="history-overlay" id="historyOverlay">
+  <div class="history-panel">
+    <h2>📅 Daily History <button class="history-close" onclick="closeHistory()">×</button></h2>
+    <button class="save-day-btn" onclick="saveToday()">💾 Save Today's Tasks</button>
+    <div id="historyList"></div>
+  </div>
+</div>
+
 <header>
   <h1>📋 Eisenhower Matrix</h1>
   <p>Organize your tasks by importance and urgency</p>
   <div class="sync-status">
     <div class="sync-dot" id="syncDot"></div>
     <span id="syncLabel">Connecting to Notion...</span>
+  </div>
+  <div class="header-controls">
+    <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle dark mode">🌙</button>
+    <button class="icon-btn" onclick="openHistory()" title="Daily history">📅</button>
   </div>
 </header>
 
@@ -120,32 +167,79 @@
   </div>
 </div>
 
-<div style="text-align:center; margin-bottom:10px; max-width:960px; margin-left:auto; margin-right:auto;">
-  <div style="display:flex; justify-content:space-between; padding: 0 60px;">
-    <span style="font-size:0.75rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#aaa;">Not Important →</span>
-    <span style="font-size:0.75rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#aaa;">← Important</span>
-  </div>
+<div class="axis-labels-top">
+  <span>← Important</span>
+  <span>Not Important →</span>
 </div>
 
 <div class="matrix-wrapper">
-  <div class="axis-label-side">⬆ Urgent &nbsp;&nbsp;&nbsp; Not Urgent ⬇</div>
+  <div class="axis-label-side flip">Not Urgent ↓ &nbsp;&nbsp;&nbsp; ↑ Urgent</div>
   <div class="matrix">
+
     <div class="quadrant" data-q="1" ondragover="onDragOver(event)" ondrop="onDrop(event,1)" ondragleave="onDragLeave(event)">
-      <div class="quadrant-header"><div class="quadrant-icon">🔥</div><div><div class="quadrant-title">Do Now</div><div class="quadrant-subtitle">Important + Urgent</div></div><div class="task-count" id="count-1">0</div></div>
-      <div class="tasks-list" id="list-1"></div><div class="drop-hint">Drag tasks here</div>
+      <div class="quadrant-header">
+        <div class="quadrant-icon">🔥</div>
+        <div style="flex:1">
+          <div class="quadrant-title-row">
+            <div class="quadrant-title">Do Now</div>
+            <div class="info-btn">i<div class="tooltip">These are your most critical tasks — important to your goals AND need to be done urgently. Handle these yourself, immediately. Don't let this quadrant grow too large.</div></div>
+          </div>
+          <div class="quadrant-subtitle">Important + Urgent</div>
+        </div>
+        <div class="task-count" id="count-1">0</div>
+      </div>
+      <div class="tasks-list" id="list-1"></div>
+      <div class="drop-hint">Drag tasks here</div>
     </div>
+
     <div class="quadrant" data-q="2" ondragover="onDragOver(event)" ondrop="onDrop(event,2)" ondragleave="onDragLeave(event)">
-      <div class="quadrant-header"><div class="quadrant-icon">📅</div><div><div class="quadrant-title">Schedule</div><div class="quadrant-subtitle">Important + Not Urgent</div></div><div class="task-count" id="count-2">0</div></div>
-      <div class="tasks-list" id="list-2"></div><div class="drop-hint">Drag tasks here</div>
+      <div class="quadrant-header">
+        <div class="quadrant-icon">📅</div>
+        <div style="flex:1">
+          <div class="quadrant-title-row">
+            <div class="quadrant-title">Schedule</div>
+            <div class="info-btn">i<div class="tooltip">These tasks matter for your long-term goals but don't need to be done right now. Plan a specific time for them. This is the quadrant of growth — time here prevents future crises.</div></div>
+          </div>
+          <div class="quadrant-subtitle">Important + Not Urgent</div>
+        </div>
+        <div class="task-count" id="count-2">0</div>
+      </div>
+      <div class="tasks-list" id="list-2"></div>
+      <div class="drop-hint">Drag tasks here</div>
     </div>
+
     <div class="quadrant" data-q="3" ondragover="onDragOver(event)" ondrop="onDrop(event,3)" ondragleave="onDragLeave(event)">
-      <div class="quadrant-header"><div class="quadrant-icon">📤</div><div><div class="quadrant-title">Delegate</div><div class="quadrant-subtitle">Not Important + Urgent</div></div><div class="task-count" id="count-3">0</div></div>
-      <div class="tasks-list" id="list-3"></div><div class="drop-hint">Drag tasks here</div>
+      <div class="quadrant-header">
+        <div class="quadrant-icon">📤</div>
+        <div style="flex:1">
+          <div class="quadrant-title-row">
+            <div class="quadrant-title">Delegate</div>
+            <div class="info-btn">i<div class="tooltip">These tasks feel urgent but don't contribute to your key goals. Try to delegate them to someone else. If you must do them yourself, do them quickly and move on.</div></div>
+          </div>
+          <div class="quadrant-subtitle">Not Important + Urgent</div>
+        </div>
+        <div class="task-count" id="count-3">0</div>
+      </div>
+      <div class="tasks-list" id="list-3"></div>
+      <div class="drop-hint">Drag tasks here</div>
     </div>
+
     <div class="quadrant" data-q="4" ondragover="onDragOver(event)" ondrop="onDrop(event,4)" ondragleave="onDragLeave(event)">
-      <div class="quadrant-header"><div class="quadrant-icon">🗑️</div><div><div class="quadrant-title">Eliminate</div><div class="quadrant-subtitle">Not Important + Not Urgent</div></div><div class="task-count" id="count-4">0</div></div>
-      <div class="tasks-list" id="list-4"></div><div class="drop-hint">Drag tasks here</div>
+      <div class="quadrant-header">
+        <div class="quadrant-icon">🗑️</div>
+        <div style="flex:1">
+          <div class="quadrant-title-row">
+            <div class="quadrant-title">Eliminate</div>
+            <div class="info-btn">i<div class="tooltip">These tasks are neither important nor urgent — they are distractions. Eliminate them entirely, or only do them if you have completely free time. Don't feel guilty dropping these.</div></div>
+          </div>
+          <div class="quadrant-subtitle">Not Important + Not Urgent</div>
+        </div>
+        <div class="task-count" id="count-4">0</div>
+      </div>
+      <div class="tasks-list" id="list-4"></div>
+      <div class="drop-hint">Drag tasks here</div>
     </div>
+
   </div>
   <div class="axis-label-side" style="opacity:0;pointer-events:none;">x</div>
 </div>
@@ -161,6 +255,16 @@
   const WORKER = 'https://crimson-sun-5aed.oriammo1994.workers.dev';
   const PAGE_ID = '31e98d96-dadd-8001-b74a-ee60fe7bb71b';
   let tasks = [], dragId = null, dbId = null;
+
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  if (savedTheme === 'dark') document.getElementById('themeBtn').textContent = '☀️';
+  function toggleTheme() {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
+  }
 
   function setSyncStatus(state, label) {
     document.getElementById('syncDot').className = 'sync-dot ' + state;
@@ -187,7 +291,7 @@
   }
 
   async function loadTasks() {
-    const data = await nFetch(`/databases/${dbId}/query`, 'POST', {
+    const data = await nFetch('/databases/' + dbId + '/query', 'POST', {
       sorts: [{ timestamp: 'created_time', direction: 'ascending' }]
     });
     tasks = data.results.map(p => ({
@@ -218,7 +322,7 @@
   async function deleteTask(id) {
     setSyncStatus('syncing', 'Deleting...');
     try {
-      await nFetch(`/pages/${id}`, 'PATCH', { archived: true });
+      await nFetch('/pages/' + id, 'PATCH', { archived: true });
       tasks = tasks.filter(t => t.id !== id); render(); setSyncStatus('ok', 'Synced with Notion ✓');
     } catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
   }
@@ -227,34 +331,34 @@
     const t = tasks.find(t => t.id === id); if (!t) return;
     t.done = !t.done; render(); setSyncStatus('syncing', 'Saving...');
     try {
-      await nFetch(`/pages/${id}`, 'PATCH', { properties: { Done: { checkbox: t.done } } });
+      await nFetch('/pages/' + id, 'PATCH', { properties: { Done: { checkbox: t.done } } });
       setSyncStatus('ok', 'Synced with Notion ✓');
     } catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
   }
 
   function render() {
-    [0,1,2,3,4].forEach(q => { const el = document.getElementById(`list-${q}`); if (el) el.innerHTML = ''; });
-    [1,2,3,4].forEach(q => { document.getElementById(`count-${q}`).textContent = tasks.filter(t => t.quadrant === q).length; });
+    [0,1,2,3,4].forEach(q => { const el = document.getElementById('list-' + q); if (el) el.innerHTML = ''; });
+    [1,2,3,4].forEach(q => { document.getElementById('count-' + q).textContent = tasks.filter(t => t.quadrant === q).length; });
     const hint = document.getElementById('unassigned-hint');
     if (hint) hint.style.display = tasks.filter(t => t.quadrant === 0).length === 0 ? 'block' : 'none';
-    tasks.forEach(task => { document.getElementById(`list-${task.quadrant}`)?.appendChild(createTaskEl(task)); });
+    tasks.forEach(task => { document.getElementById('list-' + task.quadrant)?.appendChild(createTaskEl(task)); });
   }
 
   function createTaskEl(task) {
     if (task.quadrant === 0) {
       const div = document.createElement('div');
       div.className = 'unassigned-task'; div.draggable = true;
-      div.innerHTML = `<span style="flex:1">${esc(task.text)}</span><button class="task-delete" onclick="deleteTask('${task.id}')">✕</button>`;
+      div.innerHTML = '<span style="flex:1">' + esc(task.text) + '</span><button class="task-delete" onclick="deleteTask(\'' + task.id + '\')">✕</button>';
       div.addEventListener('dragstart', () => { dragId = task.id; setTimeout(() => div.classList.add('dragging'), 0); });
       div.addEventListener('dragend', () => div.classList.remove('dragging'));
       return div;
     }
     const div = document.createElement('div');
     div.className = 'task-item'; div.draggable = true;
-    div.innerHTML = `
-      <div class="task-check" onclick="toggleDone('${task.id}')">${task.done ? '✓' : ''}</div>
-      <span class="task-text${task.done ? ' done' : ''}">${esc(task.text)}</span>
-      <button class="task-delete" onclick="deleteTask('${task.id}')">✕</button>`;
+    div.innerHTML =
+      '<div class="task-check" onclick="toggleDone(\'' + task.id + '\')">' + (task.done ? '✓' : '') + '</div>' +
+      '<span class="task-text' + (task.done ? ' done' : '') + '">' + esc(task.text) + '</span>' +
+      '<button class="task-delete" onclick="deleteTask(\'' + task.id + '\')">✕</button>';
     div.addEventListener('dragstart', () => { dragId = task.id; setTimeout(() => div.classList.add('dragging'), 0); });
     div.addEventListener('dragend', () => div.classList.remove('dragging'));
     return div;
@@ -269,12 +373,57 @@
     if (!task || task.quadrant === quadrant) return;
     task.quadrant = quadrant; render(); setSyncStatus('syncing', 'Saving...');
     try {
-      await nFetch(`/pages/${task.id}`, 'PATCH', { properties: { Quadrant: { number: quadrant } } });
+      await nFetch('/pages/' + task.id, 'PATCH', { properties: { Quadrant: { number: quadrant } } });
       setSyncStatus('ok', 'Synced with Notion ✓');
     } catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
   }
 
-  function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  const Q_NAMES = { 0: 'Unassigned', 1: 'Do Now', 2: 'Schedule', 3: 'Delegate', 4: 'Eliminate' };
+
+  function saveToday() {
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const history = JSON.parse(localStorage.getItem('eisenhower-history') || '{}');
+    history[today] = tasks.map(t => ({ text: t.text, quadrant: t.quadrant, done: t.done }));
+    localStorage.setItem('eisenhower-history', JSON.stringify(history));
+    renderHistory();
+    alert('Today saved!');
+  }
+
+  function openHistory() { renderHistory(); document.getElementById('historyOverlay').classList.add('open'); }
+  function closeHistory() { document.getElementById('historyOverlay').classList.remove('open'); }
+
+  function renderHistory() {
+    const history = JSON.parse(localStorage.getItem('eisenhower-history') || '{}');
+    const container = document.getElementById('historyList');
+    const days = Object.keys(history).reverse();
+    if (days.length === 0) {
+      container.innerHTML = '<div class="no-history">No saved days yet.<br>Click "Save Today\'s Tasks" to get started!</div>';
+      return;
+    }
+    container.innerHTML = days.map((day, i) => {
+      const dayTasks = history[day];
+      const total = dayTasks.filter(t => t.quadrant > 0).length;
+      const done = dayTasks.filter(t => t.done).length;
+      const qHtml = [1,2,3,4].map(q => {
+        const qt = dayTasks.filter(t => t.quadrant === q);
+        if (!qt.length) return '';
+        return '<div class="history-quadrant"><div class="history-quadrant-title">' + Q_NAMES[q] + '</div>' +
+          qt.map(t => '<div class="history-task ' + (t.done ? 'done' : '') + '">' + (t.done ? '✓' : '○') + ' ' + esc(t.text) + '</div>').join('') + '</div>';
+      }).join('');
+      return '<div class="history-day">' +
+        '<div class="history-day-header" onclick="toggleDay(' + i + ')">' +
+          '<span>' + day + '</span>' +
+          '<span style="color:var(--text-muted);font-size:0.8rem">' + done + '/' + total + ' done ▾</span>' +
+        '</div>' +
+        '<div class="history-day-body" id="hday-' + i + '">' + (qHtml || '<div style="color:var(--text-muted);font-size:0.85rem;padding:4px 0">No tasks in quadrants.</div>') + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function toggleDay(i) { document.getElementById('hday-' + i).classList.toggle('open'); }
+  document.getElementById('historyOverlay').addEventListener('click', function(e) { if (e.target === this) closeHistory(); });
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   document.getElementById('taskInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
 
   (async () => {
