@@ -580,7 +580,15 @@
   function saveRecurringList(list) { localStorage.setItem('eisenhower-recurring', JSON.stringify(list)); }
   function addRecurring() {
     var input = document.getElementById('recurringInput'), text = input.value.trim(); if (!text) return;
-    var list = getRecurring(); list.push({ text: text, id: Date.now() }); saveRecurringList(list); input.value = ''; renderRecurring();
+    var rid = Date.now();
+    var list = getRecurring(); list.push({ text: text, id: rid }); saveRecurringList(list); input.value = ''; renderRecurring();
+    // Add immediately to Unassigned
+    if (dbId && !tasks.find(function(t) { return t.text === text && !t.done; })) {
+      nFetch('/pages', 'POST', {
+        parent: { database_id: dbId },
+        properties: { Name: { title: [{ text: { content: text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false } }
+      }).then(function(page) { tasks.push({ id: page.id, text: text, quadrant: 0, done: false, note: '' }); render(); setSyncStatus('ok', 'Synced with Notion ✓'); }).catch(function(e) { setSyncStatus('error', 'Error: ' + e.message); });
+    }
   }
   function deleteRecurring(id) { saveRecurringList(getRecurring().filter(function(r) { return r.id !== id; })); renderRecurring(); }
   function renderRecurring() {
