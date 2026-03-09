@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/oriam/Downloads/index_1.html -->
-<html lang="he" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>מטריצת אייזנהאואר</title>
-<link href="./index_files/css2" rel="stylesheet">
+<title>Eisenhower Matrix</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --q1: #FF4D4D; --q1-light: #fff0f0;
@@ -16,7 +16,6 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px; }
-
   header { text-align: center; margin-bottom: 28px; }
   header h1 { font-size: 2.2rem; font-weight: 900; letter-spacing: -1px; }
   header p { color: var(--text-muted); font-size: 0.95rem; margin-top: 4px; }
@@ -26,31 +25,33 @@
   .sync-dot.ok { background: #34C759; }
   .sync-dot.error { background: #FF4D4D; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
   .add-task-bar {
-    display: flex; gap: 10px; max-width: 700px; margin: 0 auto 32px;
+    display: flex; gap: 10px; max-width: 700px; margin: 0 auto 16px;
     background: var(--surface); border-radius: 50px; padding: 8px 8px 8px 20px;
     box-shadow: var(--shadow); border: 2px solid transparent; transition: border 0.2s;
   }
   .add-task-bar:focus-within { border-color: #1a1a1a; }
-  .add-task-bar input { flex: 1; border: none; outline: none; font-family: 'Heebo', sans-serif; font-size: 1rem; background: transparent; color: var(--text); direction: rtl; }
+  .add-task-bar input { flex: 1; border: none; outline: none; font-family: 'Heebo', sans-serif; font-size: 1rem; background: transparent; color: var(--text); direction: ltr; }
   .add-task-bar input::placeholder { color: var(--text-muted); }
   .add-task-bar button { background: #1a1a1a; color: white; border: none; border-radius: 40px; padding: 10px 22px; font-family: 'Heebo', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: transform 0.15s, background 0.2s; white-space: nowrap; }
   .add-task-bar button:hover { background: #333; transform: scale(1.03); }
   .add-task-bar button:disabled { background: #aaa; transform: none; cursor: not-allowed; }
-
+  .unassigned-section { max-width: 700px; margin: 0 auto 32px; background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 2px dashed #ddd; }
+  .unassigned-section h3 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; }
+  .unassigned-list { display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; }
+  .unassigned-task { background: #f5f4f0; border: 1px solid #e0ddd5; border-radius: 20px; padding: 6px 14px; font-size: 0.85rem; cursor: grab; display: flex; align-items: center; gap: 8px; transition: box-shadow 0.15s, transform 0.15s; animation: slideIn 0.2s ease; user-select: none; }
+  .unassigned-task:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); transform: translateY(-1px); }
+  .unassigned-task.dragging { opacity: 0.4; }
+  .drop-hint-unassigned { font-size: 0.8rem; color: #bbb; padding: 6px 0; }
   .matrix-wrapper { display: flex; align-items: center; gap: 10px; max-width: 960px; margin: 0 auto; }
   .axis-label-side { writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.78rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); user-select: none; padding: 10px 0; }
-  .axis-label-side.right { transform: rotate(180deg); }
   .matrix { flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 14px; }
-
   .quadrant { background: var(--surface); border-radius: var(--radius); padding: 18px; min-height: 240px; box-shadow: var(--shadow); border-top: 4px solid; transition: box-shadow 0.2s, transform 0.15s; }
   .quadrant.drag-over { box-shadow: 0 8px 32px rgba(0,0,0,0.15); transform: scale(1.01); }
   .quadrant[data-q="1"] { border-color: var(--q1); background: var(--q1-light); }
   .quadrant[data-q="2"] { border-color: var(--q2); background: var(--q2-light); }
   .quadrant[data-q="3"] { border-color: var(--q3); background: var(--q3-light); }
   .quadrant[data-q="4"] { border-color: var(--q4); background: var(--q4-light); }
-
   .quadrant-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
   .quadrant-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
   .quadrant[data-q="1"] .quadrant-icon { background: var(--q1); }
@@ -59,8 +60,7 @@
   .quadrant[data-q="4"] .quadrant-icon { background: var(--q4); }
   .quadrant-title { font-size: 0.95rem; font-weight: 700; line-height: 1.2; }
   .quadrant-subtitle { font-size: 0.72rem; color: var(--text-muted); font-weight: 400; }
-  .task-count { margin-right: auto; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--text-muted); background: rgba(0,0,0,0.05); border-radius: 20px; padding: 2px 10px; }
-
+  .task-count { margin-left: auto; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--text-muted); background: rgba(0,0,0,0.05); border-radius: 20px; padding: 2px 10px; }
   .tasks-list { display: flex; flex-direction: column; gap: 8px; min-height: 40px; }
   .task-item { background: white; border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: grab; transition: box-shadow 0.15s, transform 0.15s, opacity 0.15s; border: 1px solid rgba(0,0,0,0.06); animation: slideIn 0.2s ease; user-select: none; }
   @keyframes slideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
@@ -77,24 +77,13 @@
   .task-delete:hover { color: #FF4D4D; }
   .drop-hint { text-align: center; font-size: 0.8rem; color: #bbb; padding: 10px; border: 2px dashed #ddd; border-radius: 8px; display: none; }
   .tasks-list:empty + .drop-hint { display: block; }
-
-  .unassigned-section { max-width: 960px; margin: 24px auto 0; background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 2px dashed #ddd; }
-  .unassigned-section h3 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; }
-  .unassigned-list { display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; }
-  .unassigned-task { background: #f5f4f0; border: 1px solid #e0ddd5; border-radius: 20px; padding: 6px 14px; font-size: 0.85rem; cursor: grab; display: flex; align-items: center; gap: 8px; transition: box-shadow 0.15s, transform 0.15s; animation: slideIn 0.2s ease; user-select: none; }
-  .unassigned-task:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); transform: translateY(-1px); }
-  .unassigned-task.dragging { opacity: 0.4; }
-  .drop-hint-unassigned { font-size: 0.8rem; color: #bbb; padding: 6px 0; }
-
   .legend { max-width: 960px; margin: 20px auto 0; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text-muted); }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-
   .loading-overlay { position: fixed; inset: 0; background: rgba(245,244,240,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; gap: 12px; }
   .loading-overlay p { color: var(--text-muted); font-size: 0.95rem; }
   .spinner { width: 36px; height: 36px; border: 3px solid #ddd; border-top-color: #1a1a1a; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
   @media (max-width: 600px) {
     .matrix { grid-template-columns: 1fr; }
     .axis-label-side { display: none; }
@@ -105,65 +94,67 @@
 </head>
 <body>
 
-<div class="loading-overlay" id="loadingOverlay" style="display: none;">
+<div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
   <p>Loading tasks from Notion...</p>
 </div>
 
 <header>
-  <h1>📋 מטריצת אייזנהאואר</h1>
-  <p>סדר את המשימות שלך לפי חשיבות ודחיפות</p>
+  <h1>📋 Eisenhower Matrix</h1>
+  <p>Organize your tasks by importance and urgency</p>
   <div class="sync-status">
-    <div class="sync-dot ok" id="syncDot"></div>
-    <span id="syncLabel">Synced with Notion ✓</span>
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncLabel">Connecting to Notion...</span>
   </div>
 </header>
 
 <div class="add-task-bar">
-  <input type="text" id="taskInput" placeholder="הוסף משימה חדשה..." autocomplete="off">
-  <button id="addBtn" onclick="addTask()">+ הוסף</button>
+  <input type="text" id="taskInput" placeholder="Add a new task..." autocomplete="off" />
+  <button id="addBtn" onclick="addTask()">+ Add</button>
+</div>
+
+<div class="unassigned-section" ondragover="onDragOver(event)" ondrop="onDrop(event,0)" ondragleave="onDragLeave(event)">
+  <h3>📥 Unassigned — drag to one of the quadrants</h3>
+  <div class="unassigned-list" id="list-0">
+    <span class="drop-hint-unassigned" id="unassigned-hint">Add a task above ⬆</span>
+  </div>
 </div>
 
 <div style="text-align:center; margin-bottom:10px; max-width:960px; margin-left:auto; margin-right:auto;">
   <div style="display:flex; justify-content:space-between; padding: 0 60px;">
-    <span style="font-size:0.75rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#aaa;">⬅ לא חשוב</span>
-    <span style="font-size:0.75rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#aaa;">חשוב ➡</span>
+    <span style="font-size:0.75rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#aaa;">Not Important →</span>
+    <span style="font-size:0.75rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#aaa;">← Important</span>
   </div>
 </div>
 
 <div class="matrix-wrapper">
-  <div class="axis-label-side right">⬇ לא דחוף &nbsp;&nbsp;&nbsp; דחוף ⬆</div>
+  <div class="axis-label-side">⬆ Urgent &nbsp;&nbsp;&nbsp; Not Urgent ⬇</div>
   <div class="matrix">
     <div class="quadrant" data-q="1" ondragover="onDragOver(event)" ondrop="onDrop(event,1)" ondragleave="onDragLeave(event)">
-      <div class="quadrant-header"><div class="quadrant-icon">🔥</div><div><div class="quadrant-title">עשה עכשיו</div><div class="quadrant-subtitle">חשוב + דחוף</div></div><div class="task-count" id="count-1">0</div></div>
-      <div class="tasks-list" id="list-1"></div><div class="drop-hint">גרור לכאן משימות</div>
+      <div class="quadrant-header"><div class="quadrant-icon">🔥</div><div><div class="quadrant-title">Do Now</div><div class="quadrant-subtitle">Important + Urgent</div></div><div class="task-count" id="count-1">0</div></div>
+      <div class="tasks-list" id="list-1"></div><div class="drop-hint">Drag tasks here</div>
     </div>
     <div class="quadrant" data-q="2" ondragover="onDragOver(event)" ondrop="onDrop(event,2)" ondragleave="onDragLeave(event)">
-      <div class="quadrant-header"><div class="quadrant-icon">📅</div><div><div class="quadrant-title">תכנן</div><div class="quadrant-subtitle">חשוב + לא דחוף</div></div><div class="task-count" id="count-2">0</div></div>
-      <div class="tasks-list" id="list-2"></div><div class="drop-hint">גרור לכאן משימות</div>
+      <div class="quadrant-header"><div class="quadrant-icon">📅</div><div><div class="quadrant-title">Schedule</div><div class="quadrant-subtitle">Important + Not Urgent</div></div><div class="task-count" id="count-2">0</div></div>
+      <div class="tasks-list" id="list-2"></div><div class="drop-hint">Drag tasks here</div>
     </div>
     <div class="quadrant" data-q="3" ondragover="onDragOver(event)" ondrop="onDrop(event,3)" ondragleave="onDragLeave(event)">
-      <div class="quadrant-header"><div class="quadrant-icon">📤</div><div><div class="quadrant-title">האצל</div><div class="quadrant-subtitle">לא חשוב + דחוף</div></div><div class="task-count" id="count-3">0</div></div>
-      <div class="tasks-list" id="list-3"></div><div class="drop-hint">גרור לכאן משימות</div>
+      <div class="quadrant-header"><div class="quadrant-icon">📤</div><div><div class="quadrant-title">Delegate</div><div class="quadrant-subtitle">Not Important + Urgent</div></div><div class="task-count" id="count-3">0</div></div>
+      <div class="tasks-list" id="list-3"></div><div class="drop-hint">Drag tasks here</div>
     </div>
     <div class="quadrant" data-q="4" ondragover="onDragOver(event)" ondrop="onDrop(event,4)" ondragleave="onDragLeave(event)">
-      <div class="quadrant-header"><div class="quadrant-icon">🗑️</div><div><div class="quadrant-title">בטל / מאוחר יותר</div><div class="quadrant-subtitle">לא חשוב + לא דחוף</div></div><div class="task-count" id="count-4">0</div></div>
-      <div class="tasks-list" id="list-4"></div><div class="drop-hint">גרור לכאן משימות</div>
+      <div class="quadrant-header"><div class="quadrant-icon">🗑️</div><div><div class="quadrant-title">Eliminate</div><div class="quadrant-subtitle">Not Important + Not Urgent</div></div><div class="task-count" id="count-4">0</div></div>
+      <div class="tasks-list" id="list-4"></div><div class="drop-hint">Drag tasks here</div>
     </div>
   </div>
   <div class="axis-label-side" style="opacity:0;pointer-events:none;">x</div>
 </div>
 
-<div class="unassigned-section" ondragover="onDragOver(event)" ondrop="onDrop(event,0)" ondragleave="onDragLeave(event)">
-  <h3>📥 ממתינות לסיווג — גרור לאחד הריבועים</h3>
-  <div class="unassigned-list" id="list-0"></div>
-</div>
-
 <div class="legend">
-  <div class="legend-item"><div class="legend-dot" style="background:var(--q1)"></div> עשה עכשיו</div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--q2)"></div> תכנן</div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--q3)"></div> האצל</div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--q4)"></div> בטל / מאוחר יותר</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--q1)"></div> Do Now</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--q2)"></div> Schedule</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--q3)"></div> Delegate</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--q4)"></div> Eliminate</div>
 </div>
 
 <script>
@@ -297,6 +288,5 @@
     document.getElementById('loadingOverlay').style.display = 'none';
   })();
 </script>
-
-
-</body></html>
+</body>
+</html>
