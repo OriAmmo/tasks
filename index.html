@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Daily Tasks</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -63,9 +64,10 @@
   .unassigned-section { max-width: 700px; margin: 0 auto 28px; background: var(--surface); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); border: 2px dashed var(--border); }
   .unassigned-section h3 { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px; font-weight: 600; }
   .unassigned-list { display: flex; flex-wrap: wrap; gap: 8px; min-height: 32px; }
-  .unassigned-task { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 0.85rem; cursor: grab; display: flex; align-items: center; gap: 8px; transition: box-shadow 0.15s, transform 0.15s; user-select: none; }
+  .unassigned-task { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 0.85rem; cursor: grab; display: flex; align-items: center; gap: 6px; transition: box-shadow 0.15s, transform 0.15s; user-select: none; }
   .unassigned-task:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); transform: translateY(-1px); }
   .unassigned-task.dragging { opacity: 0.4; }
+  .recurring-badge { font-size: 0.65rem; background: #007AFF20; color: #007AFF; border-radius: 4px; padding: 1px 5px; font-weight: 700; flex-shrink: 0; }
   .drop-hint-unassigned { font-size: 0.8rem; color: var(--text-muted); padding: 4px 0; }
   .matrix-outer { max-width: 960px; margin: 0 auto; }
   .axis-top { display: flex; margin-left: 28px; margin-bottom: 6px; }
@@ -114,8 +116,9 @@
   .quadrant[data-q="2"] .task-check { border-color: var(--q2); }
   .quadrant[data-q="3"] .task-check { border-color: var(--q3); }
   .quadrant[data-q="4"] .task-check { border-color: var(--q4); }
-  .task-text { flex: 1; font-size: 0.88rem; line-height: 1.4; }
+  .task-text { flex: 1; font-size: 0.88rem; line-height: 1.4; cursor: text; }
   .task-text.done { text-decoration: line-through; color: var(--text-muted); }
+  .task-text-input { flex: 1; font-size: 0.88rem; font-family: 'Inter', sans-serif; border: none; outline: none; background: transparent; color: var(--text); padding: 0; }
   .task-note-btn { background: none; border: none; cursor: pointer; font-size: 0.75rem; color: var(--text-muted); padding: 2px 5px; border-radius: 4px; transition: color 0.15s; flex-shrink: 0; }
   .task-note-btn:hover { color: var(--text); }
   .task-delete { background: none; border: none; cursor: pointer; color: var(--border); font-size: 0.9rem; padding: 2px 4px; border-radius: 4px; transition: color 0.15s; line-height: 1; flex-shrink: 0; }
@@ -161,9 +164,13 @@
   .recurring-input:focus { border-color: var(--text-muted); }
   .recurring-add-btn { background: var(--text); color: var(--bg); border: none; border-radius: 8px; padding: 8px 14px; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
   .recurring-list { display: flex; flex-direction: column; gap: 6px; }
-  .recurring-item { display: flex; align-items: center; gap: 8px; background: var(--bg); border-radius: 8px; padding: 8px 12px; font-size: 0.85rem; }
-  .recurring-item span { flex: 1; }
-  .recurring-del { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; }
+  .recurring-item { display: flex; align-items: center; gap: 6px; background: var(--bg); border-radius: 8px; padding: 8px 10px; font-size: 0.85rem; }
+  .recurring-item-text { flex: 1; cursor: pointer; }
+  .recurring-item-text:hover { text-decoration: underline; }
+  .recurring-item input { flex: 1; border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; background: var(--surface); color: var(--text); outline: none; }
+  .recurring-readd { background: none; border: none; cursor: pointer; color: #007AFF; font-size: 0.9rem; padding: 2px 5px; border-radius: 4px; transition: background 0.15s; }
+  .recurring-readd:hover { background: #007AFF20; }
+  .recurring-del { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; padding: 2px 4px; }
   .recurring-del:hover { color: #FF4D4D; }
   .section-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
   .settings-content { padding: 14px; }
@@ -367,9 +374,7 @@
   }
   function toggleTheme() {
     var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-    updateThemeUI();
+    document.documentElement.setAttribute('data-theme', next); localStorage.setItem('theme', next); updateThemeUI();
   }
 
   function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('open'); }
@@ -377,10 +382,9 @@
 
   function showPanel(name) {
     document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
-    var active = document.getElementById('panel-' + name);
-    if (active) active.classList.add('active');
+    var active = document.getElementById('panel-' + name); if (active) active.classList.add('active');
     document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('active'); });
-    var idx = { history: 0, weekly: 1, recurring: 2, settings: 3 };
+    var idx = { history:0, weekly:1, recurring:2, settings:3 };
     if (idx[name] !== undefined) document.querySelectorAll('.nav-item')[idx[name]].classList.add('active');
     if (name === 'history') renderHistory();
     if (name === 'weekly') renderWeekly();
@@ -402,12 +406,7 @@
   }
 
   async function ensureNoteProperty() {
-    // Add Note property to existing database if it doesn't exist
-    try {
-      await nFetch('/databases/' + dbId, 'PATCH', {
-        properties: { Note: { rich_text: {} } }
-      });
-    } catch(e) { /* already exists or not critical */ }
+    try { await nFetch('/databases/' + dbId, 'PATCH', { properties: { Note: { rich_text: {} } } }); } catch(e) {}
   }
 
   async function findOrCreateDatabase() {
@@ -439,10 +438,7 @@
     if (!text || !dbId) return;
     var btn = document.getElementById('addBtn'); btn.disabled = true; setSyncStatus('syncing', 'Saving...');
     try {
-      var page = await nFetch('/pages', 'POST', {
-        parent: { database_id: dbId },
-        properties: { Name: { title: [{ text: { content: text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false } }
-      });
+      var page = await nFetch('/pages', 'POST', { parent: { database_id: dbId }, properties: { Name: { title: [{ text: { content: text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false } } });
       tasks.push({ id: page.id, text: text, quadrant: 0, done: false, note: '' });
       input.value = ''; render(); setSyncStatus('ok', 'Synced with Notion ✓');
     } catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
@@ -462,6 +458,14 @@
     catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
   }
 
+  async function renameTask(id, newText) {
+    newText = newText.trim(); if (!newText) return;
+    var t = tasks.find(function(t) { return t.id === id; }); if (!t || t.text === newText) return;
+    t.text = newText; setSyncStatus('syncing', 'Saving...');
+    try { await nFetch('/pages/' + id, 'PATCH', { properties: { Name: { title: [{ text: { content: newText } }] } } }); setSyncStatus('ok', 'Synced with Notion ✓'); render(); }
+    catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
+  }
+
   async function saveNote(id, note) {
     var t = tasks.find(function(t) { return t.id === id; }); if (!t) return;
     t.note = note; setSyncStatus('syncing', 'Saving note...');
@@ -469,7 +473,6 @@
       await nFetch('/pages/' + id, 'PATCH', { properties: { Note: { rich_text: note ? [{ text: { content: note } }] : [] } } });
       setSyncStatus('ok', 'Synced with Notion ✓');
     } catch(e) {
-      // Note property might not exist yet, try to add it first
       await ensureNoteProperty();
       try { await nFetch('/pages/' + id, 'PATCH', { properties: { Note: { rich_text: note ? [{ text: { content: note } }] : [] } } }); setSyncStatus('ok', 'Synced with Notion ✓'); }
       catch(e2) { setSyncStatus('error', 'Error: ' + e2.message); }
@@ -490,18 +493,25 @@
   }
 
   function createTaskEl(task) {
+    var isRecurring = !!getRecurring().find(function(r) { return r.text === task.text; });
+
     if (task.quadrant === 0) {
       var div = document.createElement('div'); div.className = 'unassigned-task'; div.draggable = true;
-      div.innerHTML = '<span>' + esc(task.text) + '</span><button class="task-delete" onclick="deleteTask(\'' + task.id + '\')">✕</button>';
+      div.innerHTML =
+        (isRecurring ? '<span class="recurring-badge">🔄 recurring</span>' : '') +
+        '<span class="task-text" ondblclick="startInlineEdit(this, \'' + task.id + '\')">' + esc(task.text) + '</span>' +
+        '<button class="task-delete" onclick="deleteTask(\'' + task.id + '\')">✕</button>';
       div.addEventListener('dragstart', function() { dragId = task.id; setTimeout(function() { div.classList.add('dragging'); }, 0); });
       div.addEventListener('dragend', function() { div.classList.remove('dragging'); });
       return div;
     }
+
     var wrap = document.createElement('div'); wrap.className = 'task-item'; wrap.draggable = true;
     wrap.innerHTML =
       '<div class="task-main">' +
         '<div class="task-check" onclick="toggleDone(\'' + task.id + '\')">' + (task.done ? '✓' : '') + '</div>' +
-        '<span class="task-text' + (task.done ? ' done' : '') + '">' + esc(task.text) + '</span>' +
+        (isRecurring ? '<span class="recurring-badge">🔄</span>' : '') +
+        '<span class="task-text' + (task.done ? ' done' : '') + '" ondblclick="startInlineEdit(this, \'' + task.id + '\')">' + esc(task.text) + '</span>' +
         '<button class="task-note-btn" onclick="toggleNote(\'' + task.id + '\')" title="Note">📝</button>' +
         '<button class="task-delete" onclick="deleteTask(\'' + task.id + '\')">✕</button>' +
       '</div>' +
@@ -509,11 +519,31 @@
         '<textarea class="task-note-input" placeholder="Add a note..." onblur="saveNote(\'' + task.id + '\', this.value)">' + esc(task.note) + '</textarea>' +
       '</div>';
     wrap.addEventListener('dragstart', function(e) {
-      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') { e.preventDefault(); return; }
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') { e.preventDefault(); return; }
       dragId = task.id; setTimeout(function() { wrap.classList.add('dragging'); }, 0);
     });
     wrap.addEventListener('dragend', function() { wrap.classList.remove('dragging'); });
     return wrap;
+  }
+
+  function startInlineEdit(spanEl, id) {
+    var current = spanEl.textContent;
+    var input = document.createElement('input');
+    input.className = 'task-text-input';
+    input.value = current;
+    spanEl.replaceWith(input);
+    input.focus(); input.select();
+    function finish() {
+      var newText = input.value.trim() || current;
+      var span = document.createElement('span');
+      span.className = spanEl.className;
+      span.setAttribute('ondblclick', 'startInlineEdit(this, \'' + id + '\')');
+      span.textContent = newText;
+      input.replaceWith(span);
+      if (newText !== current) renameTask(id, newText);
+    }
+    input.addEventListener('blur', finish);
+    input.addEventListener('keydown', function(e) { if (e.key === 'Enter') input.blur(); if (e.key === 'Escape') { input.value = current; input.blur(); } });
   }
 
   function toggleNote(id) {
@@ -567,7 +597,7 @@
     var rows = last7.map(function(day) {
       var dt = h[day], done = dt.filter(function(t) { return t.done; }).length, total = dt.filter(function(t) { return t.quadrant > 0; }).length;
       totalT += total; totalD += done; if (done > maxD) maxD = done;
-      return { day: day.split(',')[0], done: done, total: total };
+      return { day: day.split(',')[0], done: done };
     });
     var pct = totalT > 0 ? Math.round(totalD/totalT*100) : 0;
     c.innerHTML = '<div class="week-stat"><div class="week-stat-label">Completion Rate (7 days)</div><div class="week-stat-value">' + pct + '%</div></div>' +
@@ -578,23 +608,60 @@
 
   function getRecurring() { return JSON.parse(localStorage.getItem('eisenhower-recurring') || '[]'); }
   function saveRecurringList(list) { localStorage.setItem('eisenhower-recurring', JSON.stringify(list)); }
+
   function addRecurring() {
     var input = document.getElementById('recurringInput'), text = input.value.trim(); if (!text) return;
-    var rid = Date.now();
-    var list = getRecurring(); list.push({ text: text, id: rid }); saveRecurringList(list); input.value = ''; renderRecurring();
-    // Add immediately to Unassigned
+    var list = getRecurring(); list.push({ text: text, id: Date.now() }); saveRecurringList(list); input.value = ''; renderRecurring();
     if (dbId && !tasks.find(function(t) { return t.text === text && !t.done; })) {
-      nFetch('/pages', 'POST', {
-        parent: { database_id: dbId },
-        properties: { Name: { title: [{ text: { content: text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false } }
-      }).then(function(page) { tasks.push({ id: page.id, text: text, quadrant: 0, done: false, note: '' }); render(); setSyncStatus('ok', 'Synced with Notion ✓'); }).catch(function(e) { setSyncStatus('error', 'Error: ' + e.message); });
+      nFetch('/pages', 'POST', { parent: { database_id: dbId }, properties: { Name: { title: [{ text: { content: text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false } } })
+      .then(function(page) { tasks.push({ id: page.id, text: text, quadrant: 0, done: false, note: '' }); render(); setSyncStatus('ok', 'Synced with Notion ✓'); })
+      .catch(function(e) { setSyncStatus('error', 'Error: ' + e.message); });
     }
   }
-  function deleteRecurring(id) { saveRecurringList(getRecurring().filter(function(r) { return r.id !== id; })); renderRecurring(); }
+
+  function deleteRecurring(id) { saveRecurringList(getRecurring().filter(function(r) { return r.id !== id; })); renderRecurring(); render(); }
+
+  function reAddRecurring(text) {
+    if (!dbId || tasks.find(function(t) { return t.text === text && !t.done; })) return;
+    nFetch('/pages', 'POST', { parent: { database_id: dbId }, properties: { Name: { title: [{ text: { content: text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false } } })
+    .then(function(page) { tasks.push({ id: page.id, text: text, quadrant: 0, done: false, note: '' }); render(); renderRecurring(); setSyncStatus('ok', 'Synced with Notion ✓'); })
+    .catch(function(e) { setSyncStatus('error', 'Error: ' + e.message); });
+  }
+
+  function startRecurringEdit(id) {
+    var list = getRecurring(), item = list.find(function(r) { return r.id === id; }); if (!item) return;
+    var el = document.getElementById('rec-text-' + id); if (!el) return;
+    var oldText = item.text;
+    var input = document.createElement('input');
+    input.value = oldText; input.style.cssText = 'flex:1;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-family:Inter,sans-serif;font-size:0.85rem;background:var(--surface);color:var(--text);outline:none;';
+    el.replaceWith(input); input.focus(); input.select();
+    function finish() {
+      var newText = input.value.trim() || oldText;
+      item.text = newText; saveRecurringList(list);
+      var span = document.createElement('span');
+      span.className = 'recurring-item-text'; span.id = 'rec-text-' + id;
+      span.title = 'Click to rename'; span.textContent = newText;
+      span.onclick = function() { startRecurringEdit(id); };
+      input.replaceWith(span);
+      if (newText !== oldText) render();
+    }
+    input.addEventListener('blur', finish);
+    input.addEventListener('keydown', function(e) { if (e.key === 'Enter') input.blur(); if (e.key === 'Escape') { input.value = oldText; input.blur(); } });
+  }
+
   function renderRecurring() {
     var list = getRecurring(), c = document.getElementById('recurringList'); if (!c) return;
     if (!list.length) { c.innerHTML = '<div class="no-data" style="text-align:left;padding:0;font-size:0.82rem">No recurring tasks yet.</div>'; return; }
-    c.innerHTML = list.map(function(r) { return '<div class="recurring-item"><span>🔄 ' + esc(r.text) + '</span><button class="recurring-del" onclick="deleteRecurring(' + r.id + ')">✕</button></div>'; }).join('');
+    c.innerHTML = list.map(function(r) {
+      var active = !!tasks.find(function(t) { return t.text === r.text && !t.done; });
+      return '<div class="recurring-item">' +
+        '<span class="recurring-item-text" id="rec-text-' + r.id + '" title="Click to rename" onclick="startRecurringEdit(' + r.id + ')">🔄 ' + esc(r.text) + '</span>' +
+        (active
+          ? '<span style="font-size:0.7rem;color:#34C759;font-weight:600;white-space:nowrap">● active</span>'
+          : '<button class="recurring-readd" onclick="reAddRecurring(\'' + esc(r.text) + '\')" title="Re-add to Unassigned">↩ re-add</button>') +
+        '<button class="recurring-del" onclick="deleteRecurring(' + r.id + ')">✕</button>' +
+      '</div>';
+    }).join('');
   }
 
   function checkRecurringTasks() {
@@ -603,10 +670,8 @@
     localStorage.setItem('eisenhower-recurring-check', today);
     getRecurring().forEach(function(r) {
       if (!tasks.find(function(t) { return t.text === r.text && !t.done; })) {
-        nFetch('/pages', 'POST', {
-          parent: { database_id: dbId },
-          properties: { Name: { title: [{ text: { content: r.text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false } }
-        }).then(function(page) { tasks.push({ id: page.id, text: r.text, quadrant: 0, done: false, note: '' }); render(); }).catch(function() {});
+        nFetch('/pages', 'POST', { parent: { database_id: dbId }, properties: { Name: { title: [{ text: { content: r.text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false } } })
+        .then(function(page) { tasks.push({ id: page.id, text: r.text, quadrant: 0, done: false, note: '' }); render(); }).catch(function() {});
       }
     });
   }
