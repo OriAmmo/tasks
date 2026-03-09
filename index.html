@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0045)file:///C:/Users/oriam/Downloads/index_1.html -->
+<html lang="he" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>מטריצת אייזנהאואר</title>
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="./index_files/css2" rel="stylesheet">
 <style>
   :root {
     --q1: #FF4D4D; --q1-light: #fff0f0;
@@ -17,35 +17,6 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px; }
 
-  /* Setup screen */
-  .setup-screen {
-    position: fixed; inset: 0; background: var(--bg);
-    display: flex; align-items: center; justify-content: center; z-index: 200; padding: 24px;
-  }
-  .setup-box {
-    background: white; border-radius: 24px; padding: 40px; max-width: 480px; width: 100%;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.12); text-align: center;
-  }
-  .setup-box h2 { font-size: 1.6rem; font-weight: 900; margin-bottom: 8px; }
-  .setup-box p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; line-height: 1.6; }
-  .setup-field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; text-align: right; }
-  .setup-field label { font-size: 0.85rem; font-weight: 600; }
-  .setup-field input {
-    border: 2px solid #e0ddd5; border-radius: 12px; padding: 12px 16px;
-    font-size: 0.9rem; font-family: 'Space Mono', monospace; outline: none;
-    transition: border 0.2s; direction: ltr;
-  }
-  .setup-field input:focus { border-color: #1a1a1a; }
-  .setup-btn {
-    width: 100%; background: #1a1a1a; color: white; border: none; border-radius: 12px;
-    padding: 14px; font-family: 'Heebo', sans-serif; font-size: 1rem; font-weight: 700;
-    cursor: pointer; margin-top: 8px; transition: background 0.2s;
-  }
-  .setup-btn:hover { background: #333; }
-  .setup-error { color: #FF4D4D; font-size: 0.82rem; margin-top: 10px; display: none; }
-  .setup-hint { font-size: 0.78rem; color: var(--text-muted); margin-top: 16px; line-height: 1.5; }
-  .setup-hint a { color: #007AFF; }
-
   header { text-align: center; margin-bottom: 28px; }
   header h1 { font-size: 2.2rem; font-weight: 900; letter-spacing: -1px; }
   header p { color: var(--text-muted); font-size: 0.95rem; margin-top: 4px; }
@@ -55,9 +26,6 @@
   .sync-dot.ok { background: #34C759; }
   .sync-dot.error { background: #FF4D4D; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  .reset-btn { background: none; border: none; font-size: 0.75rem; color: #ccc; cursor: pointer; margin-right: 8px; }
-  .reset-btn:hover { color: #FF4D4D; }
 
   .add-task-bar {
     display: flex; gap: 10px; max-width: 700px; margin: 0 auto 32px;
@@ -137,29 +105,7 @@
 </head>
 <body>
 
-<!-- First-time setup screen -->
-<div class="setup-screen" id="setupScreen">
-  <div class="setup-box">
-    <h2>🔑 Notion Setup</h2>
-    <p>Enter your Notion API key once — it will be saved privately in your browser and never shared with anyone.</p>
-    <div class="setup-field">
-      <label>Notion API Key</label>
-      <input type="password" id="apiKeyInput" placeholder="ntn_..." autocomplete="off" />
-    </div>
-    <div class="setup-field">
-      <label>Notion Page ID</label>
-      <input type="text" id="pageIdInput" placeholder="31e98d96dadd8001..." autocomplete="off" />
-    </div>
-    <button class="setup-btn" onclick="saveSetup()">Connect to Notion →</button>
-    <div class="setup-error" id="setupError">Could not connect. Please check your API key and Page ID.</div>
-    <p class="setup-hint">
-      Your key is stored only in <strong>this browser</strong> using localStorage.<br>
-      It is never uploaded anywhere. <a href="https://www.notion.so/my-integrations" target="_blank">Get your API key here →</a>
-    </p>
-  </div>
-</div>
-
-<div class="loading-overlay" id="loadingOverlay" style="display:none;">
+<div class="loading-overlay" id="loadingOverlay" style="display: none;">
   <div class="spinner"></div>
   <p>Loading tasks from Notion...</p>
 </div>
@@ -168,14 +114,13 @@
   <h1>📋 מטריצת אייזנהאואר</h1>
   <p>סדר את המשימות שלך לפי חשיבות ודחיפות</p>
   <div class="sync-status">
-    <button class="reset-btn" onclick="resetSetup()" title="Disconnect Notion">⚙ Reset</button>
-    <div class="sync-dot" id="syncDot"></div>
-    <span id="syncLabel">Connected to Notion</span>
+    <div class="sync-dot ok" id="syncDot"></div>
+    <span id="syncLabel">Synced with Notion ✓</span>
   </div>
 </header>
 
 <div class="add-task-bar">
-  <input type="text" id="taskInput" placeholder="הוסף משימה חדשה..." autocomplete="off" />
+  <input type="text" id="taskInput" placeholder="הוסף משימה חדשה..." autocomplete="off">
   <button id="addBtn" onclick="addTask()">+ הוסף</button>
 </div>
 
@@ -211,9 +156,7 @@
 
 <div class="unassigned-section" ondragover="onDragOver(event)" ondrop="onDrop(event,0)" ondragleave="onDragLeave(event)">
   <h3>📥 ממתינות לסיווג — גרור לאחד הריבועים</h3>
-  <div class="unassigned-list" id="list-0">
-    <span class="drop-hint-unassigned" id="unassigned-hint">הוסף משימה למעלה ⬆</span>
-  </div>
+  <div class="unassigned-list" id="list-0"></div>
 </div>
 
 <div class="legend">
@@ -224,10 +167,8 @@
 </div>
 
 <script>
-  let NOTION_TOKEN = '';
-  let PAGE_ID = '';
-  const API = 'https://api.notion.com/v1';
-  const VER = '2022-06-28';
+  const WORKER = 'https://crimson-sun-5aed.oriammo1994.workers.dev';
+  const PAGE_ID = '31e98d96-dadd-8001-b74a-ee60fe7bb71b';
   let tasks = [], dragId = null, dbId = null;
 
   function setSyncStatus(state, label) {
@@ -236,48 +177,11 @@
   }
 
   async function nFetch(path, method='GET', body=null) {
-    const opts = {
-      method,
-      headers: { 'Authorization': 'Bearer ' + NOTION_TOKEN, 'Notion-Version': VER, 'Content-Type': 'application/json' }
-    };
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
     if (body) opts.body = JSON.stringify(body);
-    const res = await fetch(API + path, opts);
+    const res = await fetch(WORKER + '/notion' + path, opts);
     if (!res.ok) { const e = await res.json(); throw new Error(e.message || 'API error'); }
     return res.json();
-  }
-
-  async function saveSetup() {
-    const key = document.getElementById('apiKeyInput').value.trim();
-    const pageId = document.getElementById('pageIdInput').value.trim().replace(/-/g, '');
-    const errEl = document.getElementById('setupError');
-    errEl.style.display = 'none';
-    if (!key || !pageId) { errEl.textContent = 'Please fill in both fields.'; errEl.style.display = 'block'; return; }
-
-    NOTION_TOKEN = key;
-    // Format page ID with dashes
-    PAGE_ID = pageId.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
-
-    const btn = document.querySelector('.setup-btn');
-    btn.textContent = 'Connecting...'; btn.disabled = true;
-
-    try {
-      await nFetch('/users/me'); // Test connection
-      localStorage.setItem('notion_token', key);
-      localStorage.setItem('notion_page_id', PAGE_ID);
-      document.getElementById('setupScreen').style.display = 'none';
-      await initApp();
-    } catch(e) {
-      errEl.textContent = 'Could not connect. Check your API key and make sure you connected the integration to your Notion page.';
-      errEl.style.display = 'block';
-      btn.textContent = 'Connect to Notion →'; btn.disabled = false;
-    }
-  }
-
-  function resetSetup() {
-    if (!confirm('Disconnect Notion? You can reconnect anytime.')) return;
-    localStorage.removeItem('notion_token');
-    localStorage.removeItem('notion_page_id');
-    location.reload();
   }
 
   async function findOrCreateDatabase() {
@@ -382,30 +286,17 @@
   function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   document.getElementById('taskInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
 
-  async function initApp() {
-    document.getElementById('loadingOverlay').style.display = 'flex';
+  (async () => {
     try {
       dbId = await findOrCreateDatabase();
       await loadTasks(); render(); setSyncStatus('ok', 'Synced with Notion ✓');
     } catch(e) {
       setSyncStatus('error', 'Connection error: ' + e.message);
+      console.error(e);
     }
     document.getElementById('loadingOverlay').style.display = 'none';
-  }
-
-  // On load — check if already set up
-  (async () => {
-    const savedToken = localStorage.getItem('notion_token');
-    const savedPage = localStorage.getItem('notion_page_id');
-    if (savedToken && savedPage) {
-      NOTION_TOKEN = savedToken;
-      PAGE_ID = savedPage;
-      document.getElementById('setupScreen').style.display = 'none';
-      await initApp();
-    }
-    // Pre-fill page ID if known
-    document.getElementById('pageIdInput').value = '31e98d96dadd8001b74aee60fe7bb71b';
   })();
 </script>
-</body>
-</html>
+
+
+</body></html>
