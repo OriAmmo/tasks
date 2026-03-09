@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מטריצת אייזנהאואר</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --q1: #FF4D4D; --q1-light: #fff0f0;
+    --q2: #FF9500; --q2-light: #fff8ee;
+    --q3: #007AFF; --q3-light: #eef5ff;
+    --q4: #34C759; --q4-light: #edfff2;
+    --bg: #f5f4f0; --surface: #ffffff; --text: #1a1a1a; --text-muted: #888;
+    --radius: 16px; --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px; }
+
+  /* Setup screen */
+  .setup-screen {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; align-items: center; justify-content: center; z-index: 200; padding: 24px;
+  }
+  .setup-box {
+    background: white; border-radius: 24px; padding: 40px; max-width: 480px; width: 100%;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12); text-align: center;
+  }
+  .setup-box h2 { font-size: 1.6rem; font-weight: 900; margin-bottom: 8px; }
+  .setup-box p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; line-height: 1.6; }
+  .setup-field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; text-align: right; }
+  .setup-field label { font-size: 0.85rem; font-weight: 600; }
+  .setup-field input {
+    border: 2px solid #e0ddd5; border-radius: 12px; padding: 12px 16px;
+    font-size: 0.9rem; font-family: 'Space Mono', monospace; outline: none;
+    transition: border 0.2s; direction: ltr;
+  }
+  .setup-field input:focus { border-color: #1a1a1a; }
+  .setup-btn {
+    width: 100%; background: #1a1a1a; color: white; border: none; border-radius: 12px;
+    padding: 14px; font-family: 'Heebo', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; margin-top: 8px; transition: background 0.2s;
+  }
+  .setup-btn:hover { background: #333; }
+  .setup-error { color: #FF4D4D; font-size: 0.82rem; margin-top: 10px; display: none; }
+  .setup-hint { font-size: 0.78rem; color: var(--text-muted); margin-top: 16px; line-height: 1.5; }
+  .setup-hint a { color: #007AFF; }
+
+  header { text-align: center; margin-bottom: 28px; }
+  header h1 { font-size: 2.2rem; font-weight: 900; letter-spacing: -1px; }
+  header p { color: var(--text-muted); font-size: 0.95rem; margin-top: 4px; }
+  .sync-status { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; margin-top: 8px; color: var(--text-muted); }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; transition: background 0.3s; }
+  .sync-dot.syncing { background: #FF9500; animation: pulse 1s infinite; }
+  .sync-dot.ok { background: #34C759; }
+  .sync-dot.error { background: #FF4D4D; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .reset-btn { background: none; border: none; font-size: 0.75rem; color: #ccc; cursor: pointer; margin-right: 8px; }
+  .reset-btn:hover { color: #FF4D4D; }
+
+  .add-task-bar {
+    display: flex; gap: 10px; max-width: 700px; margin: 0 auto 32px;
+    background: var(--surface); border-radius: 50px; padding: 8px 8px 8px 20px;
+    box-shadow: var(--shadow); border: 2px solid transparent; transition: border 0.2s;
+  }
+  .add-task-bar:focus-within { border-color: #1a1a1a; }
+  .add-task-bar input { flex: 1; border: none; outline: none; font-family: 'Heebo', sans-serif; font-size: 1rem; background: transparent; color: var(--text); direction: rtl; }
+  .add-task-bar input::placeholder { color: var(--text-muted); }
+  .add-task-bar button { background: #1a1a1a; color: white; border: none; border-radius: 40px; padding: 10px 22px; font-family: 'Heebo', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: transform 0.15s, background 0.2s; white-space: nowrap; }
+  .add-task-bar button:hover { background: #333; transform: scale(1.03); }
+  .add-task-bar button:disabled { background: #aaa; transform: none; cursor: not-allowed; }
+
+  .matrix-wrapper { display: flex; align-items: center; gap: 10px; max-width: 960px; margin: 0 auto; }
+  .axis-label-side { writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.78rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); user-select: none; padding: 10px 0; }
+  .axis-label-side.right { transform: rotate(180deg); }
+  .matrix { flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 14px; }
+
+  .quadrant { background: var(--surface); border-radius: var(--radius); padding: 18px; min-height: 240px; box-shadow: var(--shadow); border-top: 4px solid; transition: box-shadow 0.2s, transform 0.15s; }
+  .quadrant.drag-over { box-shadow: 0 8px 32px rgba(0,0,0,0.15); transform: scale(1.01); }
+  .quadrant[data-q="1"] { border-color: var(--q1); background: var(--q1-light); }
+  .quadrant[data-q="2"] { border-color: var(--q2); background: var(--q2-light); }
+  .quadrant[data-q="3"] { border-color: var(--q3); background: var(--q3-light); }
+  .quadrant[data-q="4"] { border-color: var(--q4); background: var(--q4-light); }
+
+  .quadrant-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .quadrant-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .quadrant[data-q="1"] .quadrant-icon { background: var(--q1); }
+  .quadrant[data-q="2"] .quadrant-icon { background: var(--q2); }
+  .quadrant[data-q="3"] .quadrant-icon { background: var(--q3); }
+  .quadrant[data-q="4"] .quadrant-icon { background: var(--q4); }
+  .quadrant-title { font-size: 0.95rem; font-weight: 700; line-height: 1.2; }
+  .quadrant-subtitle { font-size: 0.72rem; color: var(--text-muted); font-weight: 400; }
+  .task-count { margin-right: auto; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--text-muted); background: rgba(0,0,0,0.05); border-radius: 20px; padding: 2px 10px; }
+
+  .tasks-list { display: flex; flex-direction: column; gap: 8px; min-height: 40px; }
+  .task-item { background: white; border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: grab; transition: box-shadow 0.15s, transform 0.15s, opacity 0.15s; border: 1px solid rgba(0,0,0,0.06); animation: slideIn 0.2s ease; user-select: none; }
+  @keyframes slideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+  .task-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-1px); }
+  .task-item.dragging { opacity: 0.4; cursor: grabbing; }
+  .task-check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .quadrant[data-q="1"] .task-check { border-color: var(--q1); }
+  .quadrant[data-q="2"] .task-check { border-color: var(--q2); }
+  .quadrant[data-q="3"] .task-check { border-color: var(--q3); }
+  .quadrant[data-q="4"] .task-check { border-color: var(--q4); }
+  .task-text { flex: 1; font-size: 0.9rem; line-height: 1.4; }
+  .task-text.done { text-decoration: line-through; color: var(--text-muted); }
+  .task-delete { background: none; border: none; cursor: pointer; color: #ccc; font-size: 1rem; padding: 2px 4px; border-radius: 4px; transition: color 0.15s; line-height: 1; }
+  .task-delete:hover { color: #FF4D4D; }
+  .drop-hint { text-align: center; font-size: 0.8rem; color: #bbb; padding: 10px; border: 2px dashed #ddd; border-radius: 8px; display: none; }
+  .tasks-list:empty + .drop-hint { display: block; }
+
+  .unassigned-section { max-width: 960px; margin: 24px auto 0; background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); border: 2px dashed #ddd; }
+  .unassigned-section h3 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; }
+  .unassigned-list { display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; }
+  .unassigned-task { background: #f5f4f0; border: 1px solid #e0ddd5; border-radius: 20px; padding: 6px 14px; font-size: 0.85rem; cursor: grab; display: flex; align-items: center; gap: 8px; transition: box-shadow 0.15s, transform 0.15s; animation: slideIn 0.2s ease; user-select: none; }
+  .unassigned-task:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); transform: translateY(-1px); }
+  .unassigned-task.dragging { opacity: 0.4; }
+  .drop-hint-unassigned { font-size: 0.8rem; color: #bbb; padding: 6px 0; }
+
+  .legend { max-width: 960px; margin: 20px auto 0; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text-muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .loading-overlay { position: fixed; inset: 0; background: rgba(245,244,240,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; gap: 12px; }
+  .loading-overlay p { color: var(--text-muted); font-size: 0.95rem; }
+  .spinner { width: 36px; height: 36px; border: 3px solid #ddd; border-top-color: #1a1a1a; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 600px) {
+    .matrix { grid-template-columns: 1fr; }
+    .axis-label-side { display: none; }
+    body { padding: 14px; }
+    header h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- First-time setup screen -->
+<div class="setup-screen" id="setupScreen">
+  <div class="setup-box">
+    <h2>🔑 Notion Setup</h2>
+    <p>Enter your Notion API key once — it will be saved privately in your browser and never shared with anyone.</p>
+    <div class="setup-field">
+      <label>Notion API Key</label>
+      <input type="password" id="apiKeyInput" placeholder="ntn_..." autocomplete="off" />
+    </div>
+    <div class="setup-field">
+      <label>Notion Page ID</label>
+      <input type="text" id="pageIdInput" placeholder="31e98d96dadd8001..." autocomplete="off" />
+    </div>
+    <button class="setup-btn" onclick="saveSetup()">Connect to Notion →</button>
+    <div class="setup-error" id="setupError">Could not connect. Please check your API key and Page ID.</div>
+    <p class="setup-hint">
+      Your key is stored only in <strong>this browser</strong> using localStorage.<br>
+      It is never uploaded anywhere. <a href="https://www.notion.so/my-integrations" target="_blank">Get your API key here →</a>
+    </p>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay" style="display:none;">
+  <div class="spinner"></div>
+  <p>Loading tasks from Notion...</p>
+</div>
+
+<header>
+  <h1>📋 מטריצת אייזנהאואר</h1>
+  <p>סדר את המשימות שלך לפי חשיבות ודחיפות</p>
+  <div class="sync-status">
+    <button class="reset-btn" onclick="resetSetup()" title="Disconnect Notion">⚙ Reset</button>
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncLabel">Connected to Notion</span>
+  </div>
+</header>
+
+<div class="add-task-bar">
+  <input type="text" id="taskInput" placeholder="הוסף משימה חדשה..." autocomplete="off" />
+  <button id="addBtn" onclick="addTask()">+ הוסף</button>
+</div>
+
+<div style="text-align:center; margin-bottom:10px; max-width:960px; margin-left:auto; margin-right:auto;">
+  <div style="display:flex; justify-content:space-between; padding: 0 60px;">
+    <span style="font-size:0.75rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#aaa;">⬅ לא חשוב</span>
+    <span style="font-size:0.75rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#aaa;">חשוב ➡</span>
+  </div>
+</div>
+
+<div class="matrix-wrapper">
+  <div class="axis-label-side right">⬇ לא דחוף &nbsp;&nbsp;&nbsp; דחוף ⬆</div>
+  <div class="matrix">
+    <div class="quadrant" data-q="1" ondragover="onDragOver(event)" ondrop="onDrop(event,1)" ondragleave="onDragLeave(event)">
+      <div class="quadrant-header"><div class="quadrant-icon">🔥</div><div><div class="quadrant-title">עשה עכשיו</div><div class="quadrant-subtitle">חשוב + דחוף</div></div><div class="task-count" id="count-1">0</div></div>
+      <div class="tasks-list" id="list-1"></div><div class="drop-hint">גרור לכאן משימות</div>
+    </div>
+    <div class="quadrant" data-q="2" ondragover="onDragOver(event)" ondrop="onDrop(event,2)" ondragleave="onDragLeave(event)">
+      <div class="quadrant-header"><div class="quadrant-icon">📅</div><div><div class="quadrant-title">תכנן</div><div class="quadrant-subtitle">חשוב + לא דחוף</div></div><div class="task-count" id="count-2">0</div></div>
+      <div class="tasks-list" id="list-2"></div><div class="drop-hint">גרור לכאן משימות</div>
+    </div>
+    <div class="quadrant" data-q="3" ondragover="onDragOver(event)" ondrop="onDrop(event,3)" ondragleave="onDragLeave(event)">
+      <div class="quadrant-header"><div class="quadrant-icon">📤</div><div><div class="quadrant-title">האצל</div><div class="quadrant-subtitle">לא חשוב + דחוף</div></div><div class="task-count" id="count-3">0</div></div>
+      <div class="tasks-list" id="list-3"></div><div class="drop-hint">גרור לכאן משימות</div>
+    </div>
+    <div class="quadrant" data-q="4" ondragover="onDragOver(event)" ondrop="onDrop(event,4)" ondragleave="onDragLeave(event)">
+      <div class="quadrant-header"><div class="quadrant-icon">🗑️</div><div><div class="quadrant-title">בטל / מאוחר יותר</div><div class="quadrant-subtitle">לא חשוב + לא דחוף</div></div><div class="task-count" id="count-4">0</div></div>
+      <div class="tasks-list" id="list-4"></div><div class="drop-hint">גרור לכאן משימות</div>
+    </div>
+  </div>
+  <div class="axis-label-side" style="opacity:0;pointer-events:none;">x</div>
+</div>
+
+<div class="unassigned-section" ondragover="onDragOver(event)" ondrop="onDrop(event,0)" ondragleave="onDragLeave(event)">
+  <h3>📥 ממתינות לסיווג — גרור לאחד הריבועים</h3>
+  <div class="unassigned-list" id="list-0">
+    <span class="drop-hint-unassigned" id="unassigned-hint">הוסף משימה למעלה ⬆</span>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--q1)"></div> עשה עכשיו</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--q2)"></div> תכנן</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--q3)"></div> האצל</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--q4)"></div> בטל / מאוחר יותר</div>
+</div>
+
+<script>
+  let NOTION_TOKEN = '';
+  let PAGE_ID = '';
+  const API = 'https://api.notion.com/v1';
+  const VER = '2022-06-28';
+  let tasks = [], dragId = null, dbId = null;
+
+  function setSyncStatus(state, label) {
+    document.getElementById('syncDot').className = 'sync-dot ' + state;
+    document.getElementById('syncLabel').textContent = label;
+  }
+
+  async function nFetch(path, method='GET', body=null) {
+    const opts = {
+      method,
+      headers: { 'Authorization': 'Bearer ' + NOTION_TOKEN, 'Notion-Version': VER, 'Content-Type': 'application/json' }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(API + path, opts);
+    if (!res.ok) { const e = await res.json(); throw new Error(e.message || 'API error'); }
+    return res.json();
+  }
+
+  async function saveSetup() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    const pageId = document.getElementById('pageIdInput').value.trim().replace(/-/g, '');
+    const errEl = document.getElementById('setupError');
+    errEl.style.display = 'none';
+    if (!key || !pageId) { errEl.textContent = 'Please fill in both fields.'; errEl.style.display = 'block'; return; }
+
+    NOTION_TOKEN = key;
+    // Format page ID with dashes
+    PAGE_ID = pageId.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
+
+    const btn = document.querySelector('.setup-btn');
+    btn.textContent = 'Connecting...'; btn.disabled = true;
+
+    try {
+      await nFetch('/users/me'); // Test connection
+      localStorage.setItem('notion_token', key);
+      localStorage.setItem('notion_page_id', PAGE_ID);
+      document.getElementById('setupScreen').style.display = 'none';
+      await initApp();
+    } catch(e) {
+      errEl.textContent = 'Could not connect. Check your API key and make sure you connected the integration to your Notion page.';
+      errEl.style.display = 'block';
+      btn.textContent = 'Connect to Notion →'; btn.disabled = false;
+    }
+  }
+
+  function resetSetup() {
+    if (!confirm('Disconnect Notion? You can reconnect anytime.')) return;
+    localStorage.removeItem('notion_token');
+    localStorage.removeItem('notion_page_id');
+    location.reload();
+  }
+
+  async function findOrCreateDatabase() {
+    const search = await nFetch('/search', 'POST', { query: 'Eisenhower Tasks', filter: { value: 'database', property: 'object' } });
+    if (search.results?.length > 0) return search.results[0].id;
+    const db = await nFetch('/databases', 'POST', {
+      parent: { type: 'page_id', page_id: PAGE_ID },
+      title: [{ type: 'text', text: { content: 'Eisenhower Tasks' } }],
+      properties: { Name: { title: {} }, Quadrant: { number: {} }, Done: { checkbox: {} } }
+    });
+    return db.id;
+  }
+
+  async function loadTasks() {
+    const data = await nFetch(`/databases/${dbId}/query`, 'POST', {
+      sorts: [{ timestamp: 'created_time', direction: 'ascending' }]
+    });
+    tasks = data.results.map(p => ({
+      id: p.id,
+      text: p.properties.Name.title[0]?.plain_text || '',
+      quadrant: p.properties.Quadrant?.number ?? 0,
+      done: p.properties.Done?.checkbox || false
+    }));
+  }
+
+  async function addTask() {
+    const input = document.getElementById('taskInput');
+    const text = input.value.trim();
+    if (!text || !dbId) return;
+    const btn = document.getElementById('addBtn');
+    btn.disabled = true; setSyncStatus('syncing', 'Saving...');
+    try {
+      const page = await nFetch('/pages', 'POST', {
+        parent: { database_id: dbId },
+        properties: { Name: { title: [{ text: { content: text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false } }
+      });
+      tasks.push({ id: page.id, text, quadrant: 0, done: false });
+      input.value = ''; render(); setSyncStatus('ok', 'Synced with Notion ✓');
+    } catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
+    btn.disabled = false; input.focus();
+  }
+
+  async function deleteTask(id) {
+    setSyncStatus('syncing', 'Deleting...');
+    try {
+      await nFetch(`/pages/${id}`, 'PATCH', { archived: true });
+      tasks = tasks.filter(t => t.id !== id); render(); setSyncStatus('ok', 'Synced with Notion ✓');
+    } catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
+  }
+
+  async function toggleDone(id) {
+    const t = tasks.find(t => t.id === id); if (!t) return;
+    t.done = !t.done; render(); setSyncStatus('syncing', 'Saving...');
+    try {
+      await nFetch(`/pages/${id}`, 'PATCH', { properties: { Done: { checkbox: t.done } } });
+      setSyncStatus('ok', 'Synced with Notion ✓');
+    } catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
+  }
+
+  function render() {
+    [0,1,2,3,4].forEach(q => { const el = document.getElementById(`list-${q}`); if (el) el.innerHTML = ''; });
+    [1,2,3,4].forEach(q => { document.getElementById(`count-${q}`).textContent = tasks.filter(t => t.quadrant === q).length; });
+    const hint = document.getElementById('unassigned-hint');
+    if (hint) hint.style.display = tasks.filter(t => t.quadrant === 0).length === 0 ? 'block' : 'none';
+    tasks.forEach(task => { document.getElementById(`list-${task.quadrant}`)?.appendChild(createTaskEl(task)); });
+  }
+
+  function createTaskEl(task) {
+    if (task.quadrant === 0) {
+      const div = document.createElement('div');
+      div.className = 'unassigned-task'; div.draggable = true;
+      div.innerHTML = `<span style="flex:1">${esc(task.text)}</span><button class="task-delete" onclick="deleteTask('${task.id}')">✕</button>`;
+      div.addEventListener('dragstart', () => { dragId = task.id; setTimeout(() => div.classList.add('dragging'), 0); });
+      div.addEventListener('dragend', () => div.classList.remove('dragging'));
+      return div;
+    }
+    const div = document.createElement('div');
+    div.className = 'task-item'; div.draggable = true;
+    div.innerHTML = `
+      <div class="task-check" onclick="toggleDone('${task.id}')">${task.done ? '✓' : ''}</div>
+      <span class="task-text${task.done ? ' done' : ''}">${esc(task.text)}</span>
+      <button class="task-delete" onclick="deleteTask('${task.id}')">✕</button>`;
+    div.addEventListener('dragstart', () => { dragId = task.id; setTimeout(() => div.classList.add('dragging'), 0); });
+    div.addEventListener('dragend', () => div.classList.remove('dragging'));
+    return div;
+  }
+
+  function onDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+  function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+  async function onDrop(e, quadrant) {
+    e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+    if (!dragId) return;
+    const task = tasks.find(t => t.id === dragId); dragId = null;
+    if (!task || task.quadrant === quadrant) return;
+    task.quadrant = quadrant; render(); setSyncStatus('syncing', 'Saving...');
+    try {
+      await nFetch(`/pages/${task.id}`, 'PATCH', { properties: { Quadrant: { number: quadrant } } });
+      setSyncStatus('ok', 'Synced with Notion ✓');
+    } catch(e) { setSyncStatus('error', 'Error: ' + e.message); }
+  }
+
+  function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  document.getElementById('taskInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+
+  async function initApp() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    try {
+      dbId = await findOrCreateDatabase();
+      await loadTasks(); render(); setSyncStatus('ok', 'Synced with Notion ✓');
+    } catch(e) {
+      setSyncStatus('error', 'Connection error: ' + e.message);
+    }
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+
+  // On load — check if already set up
+  (async () => {
+    const savedToken = localStorage.getItem('notion_token');
+    const savedPage = localStorage.getItem('notion_page_id');
+    if (savedToken && savedPage) {
+      NOTION_TOKEN = savedToken;
+      PAGE_ID = savedPage;
+      document.getElementById('setupScreen').style.display = 'none';
+      await initApp();
+    }
+    // Pre-fill page ID if known
+    document.getElementById('pageIdInput').value = '31e98d96dadd8001b74aee60fe7bb71b';
+  })();
+</script>
+</body>
+</html>
