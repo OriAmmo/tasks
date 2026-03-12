@@ -784,20 +784,21 @@
     }).join('');
   }
 
-  async function checkRecurringTasks() {
-    var today = new Date().toDateString(), last = localStorage.getItem('eisenhower-recurring-check');
-    if (last === today) return;
-    localStorage.setItem('eisenhower-recurring-check', today);
+ async function checkRecurringTasks() {
+    // Only add if no undone copy already exists in Notion tasks
+    var added = false;
     for (var i = 0; i < recurringCache.length; i++) {
       var r = recurringCache[i];
-      if (!tasks.find(function(t) { return t.text === r.text && !t.done; })) {
+      var alreadyExists = tasks.find(function(t) { return t.text === r.text && !t.done; });
+      if (!alreadyExists) {
         try {
           var page = await nFetch('/pages', 'POST', { parent: { database_id: dbId }, properties: { Name: { title: [{ text: { content: r.text } }] }, Quadrant: { number: 0 }, Done: { checkbox: false } } });
           tasks.push({ id: page.id, text: r.text, quadrant: 0, done: false, note: '' });
+          added = true;
         } catch(e) {}
       }
     }
-    render();
+    if (added) render();
   }
 
   var Q_NAMES = { 0:'Unassigned', 1:'Do Now', 2:'Schedule', 3:'Delegate', 4:'Eliminate' };
